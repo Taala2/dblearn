@@ -33,6 +33,7 @@ class Exercise(SQLModel, table=True):
     submissions: List["Submission"] = Relationship(back_populates="exercise")
 
 
+
 class Submission(SQLModel, table=True):
     """Database model for user submissions."""
     id: Optional[int] = Field(default=None, primary_key=True)
