@@ -1,0 +1,238 @@
+- title: "Скалярные подзапросы"
+  description_md: |
+    # Скалярные подзапросы
+    
+    В этом упражнении вы научитесь использовать скалярные подзапросы, которые возвращают одно значение.
+    
+    ## База данных
+    
+    Вы работаете с таблицей `products`, которая содержит информацию о товарах:
+    
+    | id | name | description | price | category |
+    |----|------|-------------|-------|----------|
+    | 1  | Ноутбук ASUS | Ноутбук для работы и развлечений | 45000 | Электроника |
+    | 2  | Смартфон Samsung | Смартфон с хорошей камерой | 25000 | Электроника |
+    | 3  | Футболка Nike | Спортивная футболка | 2000 | Одежда |
+    | 4  | Кроссовки Adidas | Спортивная обувь | 5000 | Обувь |
+    | 5  | Книга "SQL для начинающих" | Учебник по SQL | 1000 | Книги |
+    
+    ## Задание
+    
+    Напишите SQL-запрос, который вернёт все товары, цена которых выше средней цены всех товаров.
+    Результат должен содержать название товара, его цену, а также среднюю цену всех товаров для сравнения.
+    
+    Результат должен быть отсортирован по убыванию цены.
+  init_sql: |
+    -- Создаём таблицу products
+    CREATE TABLE products (
+      id INTEGER PRIMARY KEY,
+      name TEXT NOT NULL,
+      description TEXT NOT NULL,
+      price INTEGER NOT NULL,
+      category TEXT NOT NULL
+    );
+    -- Вставляем тестовые данные
+    INSERT INTO products (id, name, description, price, category) VALUES
+      (1, 'Ноутбук ASUS', 'Ноутбук для работы и развлечений', 45000, 'Электроника'),
+      (2, 'Смартфон Samsung', 'Смартфон с хорошей камерой', 25000, 'Электроника'),
+      (3, 'Футболка Nike', 'Спортивная футболка', 2000, 'Одежда'),
+      (4, 'Кроссовки Adidas', 'Спортивная обувь', 5000, 'Обувь'),
+      (5, 'Книга "SQL для начинающих"', 'Учебник по SQL', 1000, 'Книги');
+  expected_sql: |
+    SELECT 
+      name, 
+      price, 
+      (SELECT AVG(price) FROM products) AS avg_price
+    FROM products
+    WHERE price > (SELECT AVG(price) FROM products)
+    ORDER BY price DESC;
+  order: 1
+  lesson_id: 7
+
+- title: "Подзапросы с IN и NOT IN"
+  description_md: |
+    # Подзапросы с IN и NOT IN
+    
+    В этом упражнении вы научитесь использовать подзапросы с операторами IN и NOT IN для фильтрации результатов.
+    
+    ## База данных
+    
+    Вы работаете с таблицами `customers` и `orders`:
+    
+    Таблица `customers`:
+    
+    | id | first_name | last_name | email | city | country |
+    |----|------------|-----------|-------|------|---------|
+    | 1  | Иван       | Иванов    | ivan@example.com | Москва | Россия |
+    | 2  | Анна       | Петрова   | anna@example.com | Санкт-Петербург | Россия |
+    | 3  | Джон       | Смит      | john@example.com | Нью-Йорк | США |
+    | 4  | Мария      | Сидорова  | maria@example.com | Минск | Беларусь |
+    | 5  | Алексей    | Козлов    | alex@example.com | Москва | Россия |
+    
+    Таблица `orders`:
+    
+    | id | customer_id | order_date | total_amount | status |
+    |----|-------------|------------|--------------|--------|
+    | 1  | 1           | 2023-01-15 | 47000 | Доставлен |
+    | 2  | 2           | 2023-01-16 | 25000 | В пути |
+    | 3  | 3           | 2023-01-17 | 7000 | Отменён |
+    | 4  | 1           | 2023-01-18 | 1000 | Доставлен |
+    | 5  | 4           | 2023-01-18 | 5000 | Отменён |
+    
+    ## Задание
+    
+    Напишите SQL-запрос, который вернёт всех клиентов, которые не сделали ни одного заказа.
+    
+    Используйте оператор NOT IN с подзапросом.
+  init_sql: |
+    -- Создаём таблицу customers
+    CREATE TABLE customers (
+      id INTEGER PRIMARY KEY,
+      first_name TEXT NOT NULL,
+      last_name  TEXT NOT NULL,
+      email      TEXT NOT NULL,
+      city       TEXT NOT NULL,
+      country    TEXT NOT NULL
+    );
+    -- Вставляем тестовые данные
+    INSERT INTO customers (id, first_name, last_name, email, city, country) VALUES
+      (1, 'Иван',   'Иванов',   'ivan@example.com', 'Москва',         'Россия'),
+      (2, 'Анна',   'Петрова',  'anna@example.com', 'Санкт-Петербург', 'Россия'),
+      (3, 'Джон',   'Смит',     'john@example.com', 'Нью-Йорк',       'США'),
+      (4, 'Мария',  'Сидорова', 'maria@example.com', 'Минск',          'Беларусь'),
+      (5, 'Алексей','Козлов',   'alex@example.com', 'Москва',         'Россия');
+    
+    -- Создаём таблицу orders
+    CREATE TABLE orders (
+      id INTEGER PRIMARY KEY,
+      customer_id INTEGER NOT NULL,
+      order_date DATE NOT NULL,
+      total_amount INTEGER NOT NULL,
+      status TEXT NOT NULL
+    );
+    -- Вставляем тестовые данные
+    INSERT INTO orders (id, customer_id, order_date, total_amount, status) VALUES
+      (1, 1, '2023-01-15', 47000, 'Доставлен'),
+      (2, 2, '2023-01-16', 25000, 'В пути'),
+      (3, 3, '2023-01-17', 7000, 'Отменён'),
+      (4, 1, '2023-01-18', 1000, 'Доставлен'),
+      (5, 4, '2023-01-18', 5000, 'Отменён');
+  expected_sql: |
+    SELECT *
+    FROM customers
+    WHERE id NOT IN (
+      SELECT DISTINCT customer_id
+      FROM orders
+    );
+  order: 2
+  lesson_id: 7
+
+- title: "Коррелированные подзапросы с EXISTS"
+  description_md: |
+    # Коррелированные подзапросы с EXISTS
+    
+    В этом упражнении вы научитесь использовать коррелированные подзапросы с оператором EXISTS.
+    
+    ## База данных
+    
+    Вы работаете с таблицами `products`, `orders` и `order_items`:
+    
+    Таблица `products`:
+    
+    | id | name | description | price | category |
+    |----|------|-------------|-------|----------|
+    | 1  | Ноутбук ASUS | Ноутбук для работы и развлечений | 45000 | Электроника |
+    | 2  | Смартфон Samsung | Смартфон с хорошей камерой | 25000 | Электроника |
+    | 3  | Футболка Nike | Спортивная футболка | 2000 | Одежда |
+    | 4  | Кроссовки Adidas | Спортивная обувь | 5000 | Обувь |
+    | 5  | Книга "SQL для начинающих" | Учебник по SQL | 1000 | Книги |
+    | 6  | Планшет iPad | Планшет для работы и развлечений | 35000 | Электроника |
+    
+    Таблица `orders`:
+    
+    | id | customer_id | order_date | total_amount | status |
+    |----|-------------|------------|--------------|--------|
+    | 1  | 1           | 2023-01-15 | 47000 | Доставлен |
+    | 2  | 2           | 2023-01-16 | 25000 | В пути |
+    | 3  | 3           | 2023-01-17 | 7000 | Отменён |
+    | 4  | 1           | 2023-01-18 | 1000 | Доставлен |
+    | 5  | 4           | 2023-01-18 | 5000 | Отменён |
+    
+    Таблица `order_items`:
+    
+    | id | order_id | product_id | quantity | price |
+    |----|----------|------------|----------|-------|
+    | 1  | 1        | 1          | 1        | 45000 |
+    | 2  | 1        | 5          | 2        | 1000 |
+    | 3  | 2        | 2          | 1        | 25000 |
+    | 4  | 3        | 3          | 1        | 2000 |
+    | 5  | 3        | 4          | 1        | 5000 |
+    | 6  | 4        | 5          | 1        | 1000 |
+    | 7  | 5        | 4          | 1        | 5000 |
+    
+    ## Задание
+    
+    Напишите SQL-запрос, который вернёт все товары, которые никогда не были заказаны.
+    
+    Используйте оператор NOT EXISTS с коррелированным подзапросом.
+  init_sql: |
+    -- Создаём таблицу products
+    CREATE TABLE products (
+      id INTEGER PRIMARY KEY,
+      name TEXT NOT NULL,
+      description TEXT NOT NULL,
+      price INTEGER NOT NULL,
+      category TEXT NOT NULL
+    );
+    -- Вставляем тестовые данные
+    INSERT INTO products (id, name, description, price, category) VALUES
+      (1, 'Ноутбук ASUS', 'Ноутбук для работы и развлечений', 45000, 'Электроника'),
+      (2, 'Смартфон Samsung', 'Смартфон с хорошей камерой', 25000, 'Электроника'),
+      (3, 'Футболка Nike', 'Спортивная футболка', 2000, 'Одежда'),
+      (4, 'Кроссовки Adidas', 'Спортивная обувь', 5000, 'Обувь'),
+      (5, 'Книга "SQL для начинающих"', 'Учебник по SQL', 1000, 'Книги'),
+      (6, 'Планшет iPad', 'Планшет для работы и развлечений', 35000, 'Электроника');
+    
+    -- Создаём таблицу orders
+    CREATE TABLE orders (
+      id INTEGER PRIMARY KEY,
+      customer_id INTEGER NOT NULL,
+      order_date DATE NOT NULL,
+      total_amount INTEGER NOT NULL,
+      status TEXT NOT NULL
+    );
+    -- Вставляем тестовые данные
+    INSERT INTO orders (id, customer_id, order_date, total_amount, status) VALUES
+      (1, 1, '2023-01-15', 47000, 'Доставлен'),
+      (2, 2, '2023-01-16', 25000, 'В пути'),
+      (3, 3, '2023-01-17', 7000, 'Отменён'),
+      (4, 1, '2023-01-18', 1000, 'Доставлен'),
+      (5, 4, '2023-01-18', 5000, 'Отменён');
+    
+    -- Создаём таблицу order_items
+    CREATE TABLE order_items (
+      id INTEGER PRIMARY KEY,
+      order_id INTEGER NOT NULL,
+      product_id INTEGER NOT NULL,
+      quantity INTEGER NOT NULL,
+      price INTEGER NOT NULL
+    );
+    -- Вставляем тестовые данные
+    INSERT INTO order_items (id, order_id, product_id, quantity, price) VALUES
+      (1, 1, 1, 1, 45000),
+      (2, 1, 5, 2, 1000),
+      (3, 2, 2, 1, 25000),
+      (4, 3, 3, 1, 2000),
+      (5, 3, 4, 1, 5000),
+      (6, 4, 5, 1, 1000),
+      (7, 5, 4, 1, 5000);
+  expected_sql: |
+    SELECT *
+    FROM products p
+    WHERE NOT EXISTS (
+      SELECT 1
+      FROM order_items oi
+      WHERE oi.product_id = p.id
+    );
+  order: 3
+  lesson_id: 7

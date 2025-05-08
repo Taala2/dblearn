@@ -1,0 +1,330 @@
+- title: "Проектирование базы данных интернет-магазина"
+  description_md: |
+    # Проектирование базы данных интернет-магазина
+    
+    В этом упражнении вы создадите структуру базы данных для интернет-магазина.
+    
+    ## Задание
+    
+    Вам необходимо спроектировать базу данных для интернет-магазина, включающую следующие сущности:
+    - Категории товаров (с возможностью иерархии категорий)
+    - Товары
+    - Клиенты
+    - Заказы
+    - Детали заказов
+    
+    Создайте SQL-запросы для создания соответствующих таблиц с правильными типами данных, первичными и внешними ключами.
+    
+    Учтите следующие требования:
+    1. Товар принадлежит одной категории
+    2. Категория может содержать подкатегории (создайте самореферентную связь)
+    3. Клиенты могут иметь несколько адресов
+    4. Заказ содержит информацию о клиенте, дате заказа, общей сумме и статусе
+    5. Детали заказа содержат информацию о товарах, их количестве и ценах
+    
+    Примечание: используйте синтаксис PostgreSQL.
+  init_sql: |
+    -- Для этого упражнения не требуется начальный SQL-код
+  expected_sql: |
+    -- Создание таблицы категорий товаров
+    CREATE TABLE categories (
+      category_id SERIAL PRIMARY KEY,
+      name VARCHAR(100) NOT NULL,
+      description TEXT,
+      parent_id INTEGER,
+      FOREIGN KEY (parent_id) REFERENCES categories(category_id)
+    );
+    
+    -- Создание таблицы товаров
+    CREATE TABLE products (
+      product_id SERIAL PRIMARY KEY,
+      name VARCHAR(200) NOT NULL,
+      description TEXT,
+      category_id INTEGER NOT NULL,
+      price DECIMAL(10, 2) NOT NULL CHECK (price >= 0),
+      stock_quantity INTEGER NOT NULL DEFAULT 0 CHECK (stock_quantity >= 0),
+      is_active BOOLEAN NOT NULL DEFAULT TRUE,
+      created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (category_id) REFERENCES categories(category_id)
+    );
+    
+    -- Создание таблицы клиентов
+    CREATE TABLE customers (
+      customer_id SERIAL PRIMARY KEY,
+      first_name VARCHAR(50) NOT NULL,
+      last_name VARCHAR(50) NOT NULL,
+      email VARCHAR(100) NOT NULL UNIQUE,
+      phone VARCHAR(20),
+      registration_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
+    
+    -- Создание таблицы адресов клиентов
+    CREATE TABLE customer_addresses (
+      address_id SERIAL PRIMARY KEY,
+      customer_id INTEGER NOT NULL,
+      address_type VARCHAR(20) NOT NULL, -- 'billing', 'shipping'
+      street_address VARCHAR(100) NOT NULL,
+      city VARCHAR(50) NOT NULL,
+      postal_code VARCHAR(20) NOT NULL,
+      country VARCHAR(50) NOT NULL,
+      is_default BOOLEAN NOT NULL DEFAULT FALSE,
+      FOREIGN KEY (customer_id) REFERENCES customers(customer_id)
+    );
+    
+    -- Создание таблицы статусов заказов
+    CREATE TABLE order_statuses (
+      status_id SERIAL PRIMARY KEY,
+      name VARCHAR(50) NOT NULL UNIQUE,
+      description TEXT
+    );
+    
+    -- Создание таблицы заказов
+    CREATE TABLE orders (
+      order_id SERIAL PRIMARY KEY,
+      customer_id INTEGER NOT NULL,
+      order_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      status_id INTEGER NOT NULL,
+      shipping_address_id INTEGER NOT NULL,
+      billing_address_id INTEGER NOT NULL,
+      total_amount DECIMAL(10, 2) NOT NULL CHECK (total_amount >= 0),
+      FOREIGN KEY (customer_id) REFERENCES customers(customer_id),
+      FOREIGN KEY (status_id) REFERENCES order_statuses(status_id),
+      FOREIGN KEY (shipping_address_id) REFERENCES customer_addresses(address_id),
+      FOREIGN KEY (billing_address_id) REFERENCES customer_addresses(address_id)
+    );
+    
+    -- Создание таблицы позиций заказа
+    CREATE TABLE order_items (
+      order_item_id SERIAL PRIMARY KEY,
+      order_id INTEGER NOT NULL,
+      product_id INTEGER NOT NULL,
+      quantity INTEGER NOT NULL CHECK (quantity > 0),
+      price DECIMAL(10, 2) NOT NULL CHECK (price >= 0),
+      FOREIGN KEY (order_id) REFERENCES orders(order_id),
+      FOREIGN KEY (product_id) REFERENCES products(product_id)
+    );
+  order: 1
+  lesson_id: 16
+
+- title: "Создание индексов и представлений"
+  description_md: |
+    # Создание индексов и представлений
+    
+    В этом упражнении вы создадите индексы и представления для оптимизации работы с базой данных интернет-магазина.
+    
+    ## База данных
+    
+    Предположим, что у вас уже есть база данных интернет-магазина со следующими таблицами:
+    - categories (категории товаров)
+    - products (товары)
+    - customers (клиенты)
+    - customer_addresses (адреса клиентов)
+    - order_statuses (статусы заказов)
+    - orders (заказы)
+    - order_items (позиции заказа)
+    
+    ## Задание
+    
+    1. Создайте необходимые индексы для ускорения работы запросов:
+       - Индекс для поиска товаров по категории
+       - Индекс для поиска заказов клиента
+       - Индекс для сортировки товаров по цене
+       - Составной индекс для поиска активных товаров в категории
+    
+    2. Создайте представление `active_products_view`, которое будет возвращать только активные товары с информацией о категории.
+    
+    3. Создайте представление `customer_orders_view`, которое будет возвращать для каждого клиента количество заказов и общую сумму.
+    
+    Примечание: используйте синтаксис PostgreSQL.
+  init_sql: |
+    -- Создаём таблицы для базы данных интернет-магазина
+    CREATE TABLE categories (
+      category_id SERIAL PRIMARY KEY,
+      name VARCHAR(100) NOT NULL,
+      description TEXT,
+      parent_id INTEGER,
+      FOREIGN KEY (parent_id) REFERENCES categories(category_id)
+    );
+    
+    CREATE TABLE products (
+      product_id SERIAL PRIMARY KEY,
+      name VARCHAR(200) NOT NULL,
+      description TEXT,
+      category_id INTEGER NOT NULL,
+      price DECIMAL(10, 2) NOT NULL CHECK (price >= 0),
+      stock_quantity INTEGER NOT NULL DEFAULT 0 CHECK (stock_quantity >= 0),
+      is_active BOOLEAN NOT NULL DEFAULT TRUE,
+      created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (category_id) REFERENCES categories(category_id)
+    );
+    
+    CREATE TABLE customers (
+      customer_id SERIAL PRIMARY KEY,
+      first_name VARCHAR(50) NOT NULL,
+      last_name VARCHAR(50) NOT NULL,
+      email VARCHAR(100) NOT NULL UNIQUE,
+      phone VARCHAR(20),
+      registration_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
+    
+    CREATE TABLE customer_addresses (
+      address_id SERIAL PRIMARY KEY,
+      customer_id INTEGER NOT NULL,
+      address_type VARCHAR(20) NOT NULL,
+      street_address VARCHAR(100) NOT NULL,
+      city VARCHAR(50) NOT NULL,
+      postal_code VARCHAR(20) NOT NULL,
+      country VARCHAR(50) NOT NULL,
+      is_default BOOLEAN NOT NULL DEFAULT FALSE,
+      FOREIGN KEY (customer_id) REFERENCES customers(customer_id)
+    );
+    
+    CREATE TABLE order_statuses (
+      status_id SERIAL PRIMARY KEY,
+      name VARCHAR(50) NOT NULL UNIQUE,
+      description TEXT
+    );
+    
+    CREATE TABLE orders (
+      order_id SERIAL PRIMARY KEY,
+      customer_id INTEGER NOT NULL,
+      order_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      status_id INTEGER NOT NULL,
+      shipping_address_id INTEGER NOT NULL,
+      billing_address_id INTEGER NOT NULL,
+      total_amount DECIMAL(10, 2) NOT NULL CHECK (total_amount >= 0),
+      FOREIGN KEY (customer_id) REFERENCES customers(customer_id),
+      FOREIGN KEY (status_id) REFERENCES order_statuses(status_id),
+      FOREIGN KEY (shipping_address_id) REFERENCES customer_addresses(address_id),
+      FOREIGN KEY (billing_address_id) REFERENCES customer_addresses(address_id)
+    );
+    
+    CREATE TABLE order_items (
+      order_item_id SERIAL PRIMARY KEY,
+      order_id INTEGER NOT NULL,
+      product_id INTEGER NOT NULL,
+      quantity INTEGER NOT NULL CHECK (quantity > 0),
+      price DECIMAL(10, 2) NOT NULL CHECK (price >= 0),
+      FOREIGN KEY (order_id) REFERENCES orders(order_id),
+      FOREIGN KEY (product_id) REFERENCES products(product_id)
+    );
+  expected_sql: |
+    -- Создание индексов
+    
+    -- Индекс для поиска товаров по категории
+    CREATE INDEX idx_products_category ON products(category_id);
+    
+    -- Индекс для поиска заказов клиента
+    CREATE INDEX idx_orders_customer ON orders(customer_id);
+    
+    -- Индекс для сортировки товаров по цене
+    CREATE INDEX idx_products_price ON products(price);
+    
+    -- Составной индекс для поиска активных товаров в категории
+    CREATE INDEX idx_products_active_category ON products(category_id, is_active);
+    
+    -- Создание представлений
+    
+    -- Представление для активных товаров с информацией о категории
+    CREATE VIEW active_products_view AS
+    SELECT 
+      p.product_id,
+      p.name,
+      p.description,
+      p.price,
+      p.stock_quantity,
+      c.category_id,
+      c.name AS category_name
+    FROM products p
+    JOIN categories c ON p.category_id = c.category_id
+    WHERE p.is_active = TRUE;
+    
+    -- Представление для статистики заказов клиентов
+    CREATE VIEW customer_orders_view AS
+    SELECT 
+      c.customer_id,
+      c.first_name,
+      c.last_name,
+      c.email,
+      COUNT(o.order_id) AS order_count,
+      COALESCE(SUM(o.total_amount), 0) AS total_spent
+    FROM customers c
+    LEFT JOIN orders o ON c.customer_id = o.customer_id
+    GROUP BY c.customer_id, c.first_name, c.last_name, c.email;
+  order: 2
+  lesson_id: 16
+
+- title: "Создание триггера для аудита"
+  description_md: |
+    # Создание триггера для аудита
+    
+    В этом упражнении вы создадите систему аудита для отслеживания изменений в базе данных интернет-магазина.
+    
+    ## База данных
+    
+    Предположим, что у вас уже есть таблица products (см. предыдущее упражнение).
+    
+    ## Задание
+    
+    1. Создайте таблицу `products_audit_log` для хранения информации о изменениях в таблице `products`:
+       - log_id (SERIAL PRIMARY KEY)
+       - table_operation (тип операции: INSERT, UPDATE, DELETE)
+       - product_id (ID товара, который был изменен)
+       - old_data (старые данные в формате JSON, для UPDATE и DELETE)
+       - new_data (новые данные в формате JSON, для INSERT и UPDATE)
+       - change_date (дата и время изменения)
+       - changed_by (пользователь, внесший изменение)
+    
+    2. Создайте триггерную функцию `products_audit_trigger_function`, которая будет записывать информацию в таблицу `products_audit_log` при изменении данных в таблице `products`.
+    
+    3. Создайте триггер `products_audit_trigger`, который будет вызывать эту функцию при вставке, обновлении или удалении данных в таблице `products`.
+    
+    Примечание: используйте синтаксис PostgreSQL.
+  init_sql: |
+    -- Создаём таблицу товаров
+    CREATE TABLE products (
+      product_id SERIAL PRIMARY KEY,
+      name VARCHAR(200) NOT NULL,
+      description TEXT,
+      category_id INTEGER NOT NULL,
+      price DECIMAL(10, 2) NOT NULL CHECK (price >= 0),
+      stock_quantity INTEGER NOT NULL DEFAULT 0 CHECK (stock_quantity >= 0),
+      is_active BOOLEAN NOT NULL DEFAULT TRUE,
+      created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
+  expected_sql: |
+    -- Создание таблицы для аудита
+    CREATE TABLE products_audit_log (
+      log_id SERIAL PRIMARY KEY,
+      table_operation VARCHAR(10) NOT NULL,
+      product_id INTEGER NOT NULL,
+      old_data JSONB,
+      new_data JSONB,
+      change_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      changed_by VARCHAR(50) NOT NULL DEFAULT CURRENT_USER
+    );
+    
+    -- Создание триггерной функции
+    CREATE OR REPLACE FUNCTION products_audit_trigger_function()
+    RETURNS TRIGGER AS $$
+    BEGIN
+      IF TG_OP = 'INSERT' THEN
+        INSERT INTO products_audit_log (table_operation, product_id, new_data)
+        VALUES (TG_OP, NEW.product_id, row_to_json(NEW));
+      ELSIF TG_OP = 'UPDATE' THEN
+        INSERT INTO products_audit_log (table_operation, product_id, old_data, new_data)
+        VALUES (TG_OP, OLD.product_id, row_to_json(OLD), row_to_json(NEW));
+      ELSIF TG_OP = 'DELETE' THEN
+        INSERT INTO products_audit_log (table_operation, product_id, old_data)
+        VALUES (TG_OP, OLD.product_id, row_to_json(OLD));
+      END IF;
+      RETURN NULL;
+    END;
+    $$ LANGUAGE plpgsql;
+    
+    -- Создание триггера
+    CREATE TRIGGER products_audit_trigger
+    AFTER INSERT OR UPDATE OR DELETE ON products
+    FOR EACH ROW EXECUTE FUNCTION products_audit_trigger_function();
+  order: 3
+  lesson_id: 16

@@ -1,0 +1,199 @@
+- title: "Создание таблиц с первичными и внешними ключами"
+  description_md: |
+    # Создание таблиц с первичными и внешними ключами
+    
+    В этом упражнении вы научитесь создавать таблицы с определением первичных и внешних ключей.
+    
+    ## Задание
+    
+    Напишите SQL-запросы для создания двух таблиц:
+    
+    1. Таблица `categories` с полями:
+       - `id` (целое число, первичный ключ)
+       - `name` (текст, не может быть NULL)
+       - `description` (текст, может быть NULL)
+    
+    2. Таблица `products` с полями:
+       - `id` (целое число, первичный ключ)
+       - `name` (текст, не может быть NULL)
+       - `price` (числовое значение, не может быть NULL, должно быть больше 0)
+       - `category_id` (целое число, не может быть NULL, внешний ключ на таблицу `categories`)
+    
+    Таблицы должны быть связаны отношением "один ко многим": одна категория может содержать много товаров, но каждый товар принадлежит только одной категории.
+  init_sql: |
+    -- Для этого упражнения не требуется начальный SQL-код
+  expected_sql: |
+    CREATE TABLE categories (
+      id INTEGER PRIMARY KEY,
+      name TEXT NOT NULL,
+      description TEXT
+    );
+    
+    CREATE TABLE products (
+      id INTEGER PRIMARY KEY,
+      name TEXT NOT NULL,
+      price NUMERIC NOT NULL CHECK (price > 0),
+      category_id INTEGER NOT NULL,
+      FOREIGN KEY (category_id) REFERENCES categories(id)
+    );
+  order: 1
+  lesson_id: 9
+
+- title: "Создание таблицы со связью многие-ко-многим"
+  description_md: |
+    # Создание таблицы со связью многие-ко-многим
+    
+    В этом упражнении вы научитесь создавать таблицы для реализации связи "многие-ко-многим".
+    
+    ## Задание
+    
+    Напишите SQL-запросы для создания трех таблиц, реализующих связь "многие-ко-многим" между заказами и товарами:
+    
+    1. Таблица `orders` с полями:
+       - `id` (целое число, первичный ключ)
+       - `customer_id` (целое число, не может быть NULL)
+       - `order_date` (дата, не может быть NULL)
+    
+    2. Таблица `products` с полями:
+       - `id` (целое число, первичный ключ)
+       - `name` (текст, не может быть NULL)
+       - `price` (числовое значение, не может быть NULL)
+    
+    3. Таблица `order_items` с полями:
+       - `order_id` (целое число, часть составного первичного ключа)
+       - `product_id` (целое число, часть составного первичного ключа)
+       - `quantity` (целое число, не может быть NULL, должно быть больше 0)
+       - `price` (числовое значение, не может быть NULL)
+    
+    Таблица `order_items` должна быть связана внешними ключами с таблицами `orders` и `products`.
+  init_sql: |
+    -- Для этого упражнения не требуется начальный SQL-код
+  expected_sql: |
+    CREATE TABLE orders (
+      id INTEGER PRIMARY KEY,
+      customer_id INTEGER NOT NULL,
+      order_date DATE NOT NULL
+    );
+    
+    CREATE TABLE products (
+      id INTEGER PRIMARY KEY,
+      name TEXT NOT NULL,
+      price NUMERIC NOT NULL
+    );
+    
+    CREATE TABLE order_items (
+      order_id INTEGER,
+      product_id INTEGER,
+      quantity INTEGER NOT NULL CHECK (quantity > 0),
+      price NUMERIC NOT NULL,
+      PRIMARY KEY (order_id, product_id),
+      FOREIGN KEY (order_id) REFERENCES orders(id),
+      FOREIGN KEY (product_id) REFERENCES products(id)
+    );
+  order: 2
+  lesson_id: 9
+
+- title: "Нормализация данных"
+  description_md: |
+    # Нормализация данных
+    
+    В этом упражнении вы научитесь применять принципы нормализации для улучшения структуры базы данных.
+    
+    ## Задание
+    
+    У вас есть денормализованная таблица `customer_orders` с информацией о заказах клиентов:
+    
+    | order_id | customer_name | customer_email | customer_address | product_name | product_price | quantity | order_date |
+    |----------|---------------|----------------|-----------------|--------------|--------------|----------|------------|
+    | 1        | Иван Иванов   | ivan@example.com | Москва          | Ноутбук ASUS | 45000        | 1        | 2023-01-15 |
+    | 2        | Иван Иванов   | ivan@example.com | Москва          | Смартфон Samsung | 25000     | 1        | 2023-01-15 |
+    | 3        | Анна Петрова  | anna@example.com | Санкт-Петербург | Клавиатура   | 3000         | 2        | 2023-01-16 |
+    | 4        | Анна Петрова  | anna@example.com | Санкт-Петербург | Мышь         | 1000         | 1        | 2023-01-16 |
+    
+    Напишите SQL-запросы для создания нормализованной структуры базы данных (3NF) с таблицами:
+    - `customers` (информация о клиентах)
+    - `products` (информация о товарах)
+    - `orders` (информация о заказах)
+    - `order_items` (информация о товарах в заказах)
+    
+    И SQL-запросы для заполнения этих таблиц данными из исходной таблицы.
+  init_sql: |
+    -- Создаем исходную денормализованную таблицу
+    CREATE TABLE customer_orders (
+      order_id INTEGER,
+      customer_name TEXT,
+      customer_email TEXT,
+      customer_address TEXT,
+      product_name TEXT,
+      product_price INTEGER,
+      quantity INTEGER,
+      order_date DATE
+    );
+    
+    -- Заполняем таблицу тестовыми данными
+    INSERT INTO customer_orders VALUES
+      (1, 'Иван Иванов', 'ivan@example.com', 'Москва', 'Ноутбук ASUS', 45000, 1, '2023-01-15'),
+      (2, 'Иван Иванов', 'ivan@example.com', 'Москва', 'Смартфон Samsung', 25000, 1, '2023-01-15'),
+      (3, 'Анна Петрова', 'anna@example.com', 'Санкт-Петербург', 'Клавиатура', 3000, 2, '2023-01-16'),
+      (4, 'Анна Петрова', 'anna@example.com', 'Санкт-Петербург', 'Мышь', 1000, 1, '2023-01-16');
+  expected_sql: |
+    -- Создание таблиц
+    CREATE TABLE customers (
+      id INTEGER PRIMARY KEY,
+      name TEXT NOT NULL,
+      email TEXT NOT NULL UNIQUE,
+      address TEXT NOT NULL
+    );
+    
+    CREATE TABLE products (
+      id INTEGER PRIMARY KEY,
+      name TEXT NOT NULL,
+      price INTEGER NOT NULL
+    );
+    
+    CREATE TABLE orders (
+      id INTEGER PRIMARY KEY,
+      customer_id INTEGER NOT NULL,
+      order_date DATE NOT NULL,
+      FOREIGN KEY (customer_id) REFERENCES customers(id)
+    );
+    
+    CREATE TABLE order_items (
+      order_id INTEGER,
+      product_id INTEGER,
+      quantity INTEGER NOT NULL,
+      PRIMARY KEY (order_id, product_id),
+      FOREIGN KEY (order_id) REFERENCES orders(id),
+      FOREIGN KEY (product_id) REFERENCES products(id)
+    );
+    
+    -- Заполнение таблиц данными
+    INSERT INTO customers (id, name, email, address)
+    SELECT 1, 'Иван Иванов', 'ivan@example.com', 'Москва'
+    UNION
+    SELECT 2, 'Анна Петрова', 'anna@example.com', 'Санкт-Петербург';
+    
+    INSERT INTO products (id, name, price)
+    SELECT 1, 'Ноутбук ASUS', 45000
+    UNION
+    SELECT 2, 'Смартфон Samsung', 25000
+    UNION
+    SELECT 3, 'Клавиатура', 3000
+    UNION
+    SELECT 4, 'Мышь', 1000;
+    
+    INSERT INTO orders (id, customer_id, order_date)
+    SELECT 1, 1, '2023-01-15'
+    UNION
+    SELECT 2, 2, '2023-01-16';
+    
+    INSERT INTO order_items (order_id, product_id, quantity)
+    SELECT 1, 1, 1
+    UNION
+    SELECT 1, 2, 1
+    UNION
+    SELECT 2, 3, 2
+    UNION
+    SELECT 2, 4, 1;
+  order: 3
+  lesson_id: 9

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Обучение SQL - Урок</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <!-- Добавляем библиотеку для отображения markdown -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
+</head>
+<body>
+  <header>
+    <nav class="navbar">
+      <div class="container">
+        <div class="navbar-brand">
+          <h1>SQL Обучение</h1>
+        </div>
+        <div class="navbar-menu">
+          <ul class="nav-links">
+            <li><a href="/" class="nav-link">Главная</a></li>
+            <li><a href="/lessons.html" class="nav-link">Уроки</a></li>
+            <li><a href="/exercises.html" class="nav-link">Упражнения</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container">
+    <section class="lesson-content">
+      <div class="lesson-navigation">
+        <a href="/lessons.html" class="btn btn-outline">&laquo; Назад к урокам</a>
+      </div>
+      
+      <div id="lesson-container">
+        <div class="loading">Загрузка урока...</div>
+      </div>
+      
+      <div class="lesson-navigation-bottom">
+        <div id="prev-lesson"></div>
+        <div id="next-lesson"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>&copy; 2025 Обучение SQL</p>
+    </div>
+  </footer>
+
+  <!-- Тип "module" позволяет использовать ES модули и import/export -->
+  <script type="module">
+    import { lessonsApi } from '/js/api.js';
+
+    // Получаем параметры из URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const lessonId = urlParams.get('id');
+    const lessonSlug = urlParams.get('slug');
+
+    // Загружаем урок при загрузке страницы
+    document.addEventListener('DOMContentLoaded', () => {
+      loadLesson();
+    });
+
+    // Загрузка урока из API
+    async function loadLesson() {
+      try {
+        let lesson;
+        
+        // Загружаем урок либо по ID, либо по slug
+        if (lessonId) {
+          lesson = await lessonsApi.getById(lessonId);
+        } else if (lessonSlug) {
+          lesson = await lessonsApi.getBySlug(lessonSlug);
+        } else {
+          showError('Идентификатор урока не указан в URL.');
+          return;
+        }
+        
+        // Отображаем урок
+        displayLesson(lesson);
+        
+        // Обновляем заголовок страницы
+        document.title = `${lesson.title} - Обучение SQL`;
+        
+        // Загружаем навигацию между уроками
+        loadLessonNavigation(lesson.id);
+      } catch (error) {
+        showError('Не удалось загрузить урок. Пожалуйста, попробуйте позже.');
+        console.error('Ошибка загрузки урока:', error);
+      }
+    }
+
+    // Отображение урока на странице
+    function displayLesson(lesson) {
+      const lessonContainer = document.getElementById('lesson-container');
+      
+      // Преобразуем markdown в HTML
+      const contentHtml = marked.parse(lesson.body_md);
+      
+      lessonContainer.innerHTML = `
+        <h2>${lesson.title}</h2>
+        <p class="lesson-info">Обновлено: ${formatDate(lesson.updated_at)}</p>
+        <div class="lesson-body">
+          ${contentHtml}
+        </div>
+      `;
+    }
+
+    // Загрузка навигации между уроками
+    async function loadLessonNavigation(currentLessonId) {
+      try {
+        // Здесь можно было бы загрузить список всех уроков и найти предыдущий/следующий
+        // Для простоты просто предположим, что ID идут последовательно
+        const prevId = parseInt(currentLessonId) - 1;
+        const nextId = parseInt(currentLessonId) + 1;
+        
+        const prevContainer = document.getElementById('prev-lesson');
+        const nextContainer = document.getElementById('next-lesson');
+        
+        if (prevId > 0) {
+          prevContainer.innerHTML = `
+            <a href="/lesson.html?id=${prevId}" class="btn">&laquo; Предыдущий урок</a>
+          `;
+        }
+        
+        nextContainer.innerHTML = `
+          <a href="/lesson.html?id=${nextId}" class="btn">Следующий урок &raquo;</a>
+        `;
+      } catch (error) {
+        console.error('Ошибка при загрузке навигации:', error);
+      }
+    }
+
+    // Вспомогательные функции
+    function formatDate(dateString) {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('ru-RU', { 
+        day: '2-digit', 
+        month: '2-digit', 
+        year: 'numeric' 
+      });
+    }
+
+    function showError(message) {
+      const lessonContainer = document.getElementById('lesson-container');
+      lessonContainer.innerHTML = `<div class="error">${message}</div>`;
+    }
+  </script>
+</body>
+</html>

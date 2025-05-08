@@ -1,0 +1,139 @@
+- title: "Добавление новых данных с INSERT"
+  description_md: |
+    # Добавление новых данных с INSERT
+    
+    В этом упражнении вы научитесь использовать оператор INSERT для добавления новых строк в таблицу.
+    
+    ## База данных
+    
+    Вы работаете с таблицей `customers`, которая содержит информацию о клиентах:
+    
+    | id | first_name | last_name | email | city | country |
+    |----|------------|-----------|-------|------|---------|
+    | 1  | Иван       | Иванов    | ivan@example.com | Москва | Россия |
+    | 2  | Анна       | Петрова   | anna@example.com | Санкт-Петербург | Россия |
+    | 3  | Джон       | Смит      | john@example.com | Нью-Йорк | США |
+    | 4  | Мария      | Сидорова  | maria@example.com | Минск | Беларусь |
+    | 5  | Алексей    | Козлов    | alex@example.com | Москва | Россия |
+    
+    ## Задание
+    
+    Напишите SQL-запрос, который добавит нового клиента со следующими данными:
+    - Имя: Елена
+    - Фамилия: Смирнова
+    - Email: elena@example.com
+    - Город: Казань
+    - Страна: Россия
+    
+    Не указывайте ID явно, пусть он будет назначен автоматически.
+  init_sql: |
+    -- Создаём таблицу customers
+    CREATE TABLE customers (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      first_name TEXT NOT NULL,
+      last_name  TEXT NOT NULL,
+      email      TEXT NOT NULL,
+      city       TEXT NOT NULL,
+      country    TEXT NOT NULL
+    );
+    -- Вставляем тестовые данные
+    INSERT INTO customers (first_name, last_name, email, city, country) VALUES
+      ('Иван',   'Иванов',   'ivan@example.com', 'Москва',         'Россия'),
+      ('Анна',   'Петрова',  'anna@example.com', 'Санкт-Петербург', 'Россия'),
+      ('Джон',   'Смит',     'john@example.com', 'Нью-Йорк',       'США'),
+      ('Мария',  'Сидорова', 'maria@example.com', 'Минск',          'Беларусь'),
+      ('Алексей','Козлов',   'alex@example.com', 'Москва',         'Россия');
+  expected_sql: |
+    INSERT INTO customers (first_name, last_name, email, city, country)
+    VALUES ('Елена', 'Смирнова', 'elena@example.com', 'Казань', 'Россия');
+  order: 1
+  lesson_id: 4
+
+- title: "Обновление данных с UPDATE"
+  description_md: |
+    # Обновление данных с UPDATE
+    
+    В этом упражнении вы научитесь использовать оператор UPDATE для изменения существующих строк в таблице.
+    
+    ## База данных
+    
+    Вы работаете с таблицей `products`, которая содержит информацию о товарах:
+    
+    | id | name | description | price | category |
+    |----|------|-------------|-------|----------|
+    | 1  | Ноутбук ASUS | Ноутбук для работы и развлечений | 45000 | Электроника |
+    | 2  | Смартфон Samsung | Смартфон с хорошей камерой | 25000 | Электроника |
+    | 3  | Футболка Nike | Спортивная футболка | 2000 | Одежда |
+    | 4  | Кроссовки Adidas | Спортивная обувь | 5000 | Обувь |
+    | 5  | Книга "SQL для начинающих" | Учебник по SQL | 1000 | Книги |
+    
+    ## Задание
+    
+    Компания решила снизить цены на все товары в категории "Электроника" на 10%. 
+    Напишите SQL-запрос, который обновит цены всех товаров в категории "Электроника", 
+    уменьшив их на 10% от текущей стоимости.
+  init_sql: |
+    -- Создаём таблицу products
+    CREATE TABLE products (
+      id INTEGER PRIMARY KEY,
+      name TEXT NOT NULL,
+      description TEXT NOT NULL,
+      price INTEGER NOT NULL,
+      category TEXT NOT NULL
+    );
+    -- Вставляем тестовые данные
+    INSERT INTO products (id, name, description, price, category) VALUES
+      (1, 'Ноутбук ASUS', 'Ноутбук для работы и развлечений', 45000, 'Электроника'),
+      (2, 'Смартфон Samsung', 'Смартфон с хорошей камерой', 25000, 'Электроника'),
+      (3, 'Футболка Nike', 'Спортивная футболка', 2000, 'Одежда'),
+      (4, 'Кроссовки Adidas', 'Спортивная обувь', 5000, 'Обувь'),
+      (5, 'Книга "SQL для начинающих"', 'Учебник по SQL', 1000, 'Книги');
+  expected_sql: |
+    UPDATE products
+    SET price = price * 0.9
+    WHERE category = 'Электроника';
+  order: 2
+  lesson_id: 4
+
+- title: "Удаление данных с DELETE"
+  description_md: |
+    # Удаление данных с DELETE
+    
+    В этом упражнении вы научитесь использовать оператор DELETE для удаления строк из таблицы.
+    
+    ## База данных
+    
+    Вы работаете с таблицей `orders`, которая содержит информацию о заказах:
+    
+    | id | customer_id | order_date | total_amount | status |
+    |----|-------------|------------|--------------|--------|
+    | 1  | 1           | 2023-01-15 | 47000 | Доставлен |
+    | 2  | 2           | 2023-01-16 | 25000 | В пути |
+    | 3  | 3           | 2023-01-17 | 7000 | Отменён |
+    | 4  | 1           | 2023-01-18 | 1000 | Доставлен |
+    | 5  | 4           | 2023-01-18 | 5000 | Отменён |
+    
+    ## Задание
+    
+    Напишите SQL-запрос, который удалит все отменённые заказы из таблицы.
+  init_sql: |
+    -- Создаём таблицу orders
+    CREATE TABLE orders (
+      id INTEGER PRIMARY KEY,
+      customer_id INTEGER NOT NULL,
+      order_date DATE NOT NULL,
+      total_amount INTEGER NOT NULL,
+      status TEXT NOT NULL
+    );
+    -- Вставляем тестовые данные
+    INSERT INTO orders (id, customer_id, order_date, total_amount, status) VALUES
+      (1, 1, '2023-01-15', 47000, 'Доставлен'),
+      (2, 2, '2023-01-16', 25000, 'В пути'),
+      (3, 3, '2023-01-17', 7000, 'Отменён'),
+      (4, 1, '2023-01-18', 1000, 'Доставлен'),
+      (5, 4, '2023-01-18', 5000, 'Отменён');
+  expected_sql: |
+    DELETE FROM orders
+    WHERE status = 'Отменён';
+  order: 3
+  lesson_id: 4

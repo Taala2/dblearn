@@ -1,0 +1,131 @@
+- title: "Фильтрация по простому условию"
+  description_md: |
+    # Фильтрация по простому условию
+    
+    В этом упражнении вы научитесь использовать оператор WHERE для фильтрации данных по простому условию.
+    
+    ## База данных
+    
+    Вы работаете с таблицей `products`, которая содержит информацию о товарах:
+    
+    | id | name | description | price | category |
+    |----|------|-------------|-------|----------|
+    | 1  | Ноутбук ASUS | Ноутбук для работы и развлечений | 45000 | Электроника |
+    | 2  | Смартфон Samsung | Смартфон с хорошей камерой | 25000 | Электроника |
+    | 3  | Футболка Nike | Спортивная футболка | 2000 | Одежда |
+    | 4  | Кроссовки Adidas | Спортивная обувь | 5000 | Обувь |
+    | 5  | Книга "SQL для начинающих" | Учебник по SQL | 1000 | Книги |
+    
+    ## Задание
+    
+    Напишите SQL-запрос, который вернёт все товары из категории "Электроника".
+  init_sql: |
+    -- Создаём таблицу products
+    CREATE TABLE products (
+      id INTEGER PRIMARY KEY,
+      name TEXT NOT NULL,
+      description TEXT NOT NULL,
+      price INTEGER NOT NULL,
+      category TEXT NOT NULL
+    );
+    -- Вставляем тестовые данные
+    INSERT INTO products (id, name, description, price, category) VALUES
+      (1, 'Ноутбук ASUS', 'Ноутбук для работы и развлечений', 45000, 'Электроника'),
+      (2, 'Смартфон Samsung', 'Смартфон с хорошей камерой', 25000, 'Электроника'),
+      (3, 'Футболка Nike', 'Спортивная футболка', 2000, 'Одежда'),
+      (4, 'Кроссовки Adidas', 'Спортивная обувь', 5000, 'Обувь'),
+      (5, 'Книга "SQL для начинающих"', 'Учебник по SQL', 1000, 'Книги');
+  expected_sql: |
+    SELECT *
+    FROM products
+    WHERE category = 'Электроника';
+  order: 1
+  lesson_id: 2
+
+- title: "Фильтрация по диапазону значений"
+  description_md: |
+    # Фильтрация по диапазону значений
+    
+    В этом упражнении вы научитесь использовать оператор BETWEEN для фильтрации данных по диапазону значений.
+    
+    ## База данных
+    
+    Вы работаете с таблицей `orders`, которая содержит информацию о заказах:
+    
+    | id | customer_id | order_date | total_amount |
+    |----|-------------|------------|--------------|
+    | 1  | 1           | 2023-01-15 | 47000 |
+    | 2  | 2           | 2023-01-16 | 25000 |
+    | 3  | 3           | 2023-01-17 | 7000 |
+    | 4  | 1           | 2023-01-18 | 1000 |
+    | 5  | 4           | 2023-01-18 | 5000 |
+    
+    ## Задание
+    
+    Напишите SQL-запрос, который вернёт все заказы с суммой от 5000 до 30000 рублей включительно.
+  init_sql: |
+    -- Создаём таблицу orders
+    CREATE TABLE orders (
+      id INTEGER PRIMARY KEY,
+      customer_id INTEGER NOT NULL,
+      order_date DATE NOT NULL,
+      total_amount INTEGER NOT NULL
+    );
+    -- Вставляем тестовые данные
+    INSERT INTO orders (id, customer_id, order_date, total_amount) VALUES
+      (1, 1, '2023-01-15', 47000),
+      (2, 2, '2023-01-16', 25000),
+      (3, 3, '2023-01-17', 7000),
+      (4, 1, '2023-01-18', 1000),
+      (5, 4, '2023-01-18', 5000);
+  expected_sql: |
+    SELECT *
+    FROM orders
+    WHERE total_amount BETWEEN 5000 AND 30000;
+  order: 2
+  lesson_id: 2
+
+- title: "Поиск по шаблону с LIKE"
+  description_md: |
+    # Поиск по шаблону с LIKE
+    
+    В этом упражнении вы научитесь использовать оператор LIKE для поиска данных по шаблону.
+    
+    ## База данных
+    
+    Вы работаете с таблицей `customers`, которая содержит информацию о клиентах:
+    
+    | id | first_name | last_name | email | city | country |
+    |----|------------|-----------|-------|------|---------|
+    | 1  | Иван       | Иванов    | ivan@example.com | Москва | Россия |
+    | 2  | Анна       | Петрова   | anna@example.com | Санкт-Петербург | Россия |
+    | 3  | Джон       | Смит      | john@example.com | Нью-Йорк | США |
+    | 4  | Мария      | Сидорова  | maria@example.com | Минск | Беларусь |
+    | 5  | Алексей    | Козлов    | alex@example.com | Москва | Россия |
+    
+    ## Задание
+    
+    Напишите SQL-запрос, который найдёт всех клиентов, имена которых начинаются на букву "А".
+  init_sql: |
+    -- Создаём таблицу customers
+    CREATE TABLE customers (
+      id INTEGER PRIMARY KEY,
+      first_name TEXT NOT NULL,
+      last_name  TEXT NOT NULL,
+      email      TEXT NOT NULL,
+      city       TEXT NOT NULL,
+      country    TEXT NOT NULL
+    );
+    -- Вставляем тестовые данные
+    INSERT INTO customers (id, first_name, last_name, email, city, country) VALUES
+      (1, 'Иван',   'Иванов',   'ivan@example.com', 'Москва',           'Россия'),
+      (2, 'Анна',   'Петрова',  'anna@example.com','Санкт-Петербург', 'Россия'),
+      (3, 'Джон',   'Смит',     'john@example.com','Нью-Йорк',         'США'),
+      (4, 'Мария',  'Сидорова', 'maria@example.com','Минск',            'Беларусь'),
+      (5, 'Алексей','Козлов',   'alex@example.com','Москва',           'Россия');
+  expected_sql: |
+    SELECT *
+    FROM customers
+    WHERE first_name LIKE 'А%';
+  order: 3
+  lesson_id: 2

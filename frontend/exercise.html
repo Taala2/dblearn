@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Обучение SQL - Упражнение</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <!-- Добавляем библиотеку CodeMirror для редактора кода -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.3/codemirror.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.3/codemirror.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.3/mode/sql/sql.min.js"></script>
+  <!-- Добавляем библиотеку для отображения markdown -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
+  <style>
+    /* Стили для SQL редактора */
+    .CodeMirror {
+      height: 200px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 14px;
+    }
+    
+    .editor-container {
+      margin: 20px 0;
+    }
+    
+    .sql-toolbar {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 10px;
+      margin-bottom: 20px;
+    }
+    
+    .result-container {
+      margin-top: 20px;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      overflow: hidden;
+    }
+    
+    .result-header {
+      background-color: var(--primary-color);
+      color: white;
+      padding: 0.75rem 1rem;
+      font-weight: 600;
+    }
+
+
+    .result-container.visible {
+      display: block;
+    }
+    
+    .result-body {
+      padding: 1rem;
+      background-color: white;
+    }
+
+    .result-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+
+    .result-table th {
+      background-color: #f0f2f5;
+      font-weight: 600;
+      text-align: left;
+      padding: 0.75rem;
+      border-bottom: 2px solid #dee2e6;
+    }
+
+    .result-table td {
+      padding: 0.75rem;
+      border-bottom: 1px solid #dee2e6;
+    }
+
+    .result-table tr:hover {
+      background-color: rgba(0, 0, 0, 0.03);
+    }
+    
+    .result-message {
+      padding: 10px;
+      border-radius: 4px;
+      margin-bottom: 10px;
+    }
+    
+    .result-message.success {
+      background-color: #d4edda;
+      color: #155724;
+    }
+    
+    .result-message.error {
+      background-color: #f8d7da;
+      color: #721c24;
+    }
+    
+    .result-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.9em;
+      color: #666;
+      margin-bottom: 10px;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 5px;
+    }
+
+    .lesson-link {
+      margin-top: 5px;
+      display: block;
+    }
+    
+    /* Стили для правильного решения */
+    .correct-solution {
+      margin-top: 20px;
+      padding: 15px;
+      background-color: #d4edda;
+      border: 1px solid #c3e6cb;
+      border-radius: 4px;
+      color: #155724;
+    }
+    
+    /* Стили для неправильного решения */
+    .incorrect-solution {
+      margin-top: 20px;
+      padding: 15px;
+      background-color: #f8d7da;
+      border: 1px solid #f5c6cb;
+      border-radius: 4px;
+      color: #721c24;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <nav class="navbar">
+      <div class="container">
+        <div class="navbar-brand">
+          <h1>SQL Обучение</h1>
+        </div>
+        <div class="navbar-menu">
+          <ul class="nav-links">
+            <li><a href="/" class="nav-link">Главная</a></li>
+            <li><a href="/lessons.html" class="nav-link">Уроки</a></li>
+            <li><a href="/exercises.html" class="nav-link">Упражнения</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container">
+    <section class="exercise-content">
+      <div class="exercise-navigation">
+        <a href="/exercises.html" class="btn btn-outline">&laquo; Назад к упражнениям</a>
+      </div>
+      
+      <div id="exercise-container">
+        <div class="loading">Загрузка упражнения...</div>
+      </div>
+      
+      <div id="sql-editor-section" style="display: none;">
+        <h3>SQL-консоль</h3>
+        <div class="editor-container">
+          <div id="sql-editor"></div>
+        </div>
+        
+        <div class="sql-toolbar">
+          <div>
+            <button id="reset-sql-btn" class="btn btn-outline btn-sm">
+                <i class="icon-refresh"></i> Сбросить
+              </button>
+          </div>
+          <div class="panel-actions mt-2">
+            <button id="run-sql-btn" class="btn btn-primary">
+                <i class="icon-play"></i> Выполнить
+              </button>
+          </div>
+        </div>
+        
+        <div id="result-container" class="result-container">
+          <div id="result-message" class="result-message"></div>
+          <div id="result-meta" class="result-meta" style="display: none">
+            <div>Время выполнения: <span id="execution-time">0</span> мс</div>
+            <div>Количество строк: <span id="rows-count">0</span></div>
+          </div>
+          <div id="result-data"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>&copy; 2025 Обучение SQL</p>
+    </div>
+  </footer>
+
+  <!-- Тип "module" позволяет использовать ES модули и import/export -->
+  <script type="module">
+    import { exercisesApi } from '/js/api.js';
+
+    // Получаем параметры из URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const exerciseId = urlParams.get('id');
+    
+    // Глобальная переменная для редактора CodeMirror
+    let sqlEditor;
+    
+    // Глобальная переменная для текущего упражнения
+    let currentExercise;
+
+    // Загружаем упражнение при загрузке страницы
+    document.addEventListener('DOMContentLoaded', () => {
+      loadExercise();
+      
+      // Инициализация обработчиков событий
+      document.getElementById('run-sql-btn').addEventListener('click', runSqlCode);
+      document.getElementById('reset-sql-btn').addEventListener('click', resetEditor);
+    });
+
+    // Загрузка упражнения из API
+    async function loadExercise() {
+      try {
+        if (!exerciseId) {
+          showError('Идентификатор упражнения не указан в URL.');
+          return;
+        }
+        
+        // Загружаем упражнение по ID
+        currentExercise = await exercisesApi.getById(exerciseId);
+        
+        // Отображаем упражнение
+        displayExercise(currentExercise);
+        
+        // Инициализируем SQL-редактор
+        initSqlEditor(currentExercise.init_sql || '-- Введите ваш SQL-запрос здесь\n');
+        
+        // Показываем секцию с редактором
+        document.getElementById('sql-editor-section').style.display = 'block';
+        
+        // Обновляем заголовок страницы
+        document.title = `${currentExercise.title} - Обучение SQL`;
+      } catch (error) {
+        showError('Не удалось загрузить упражнение. Пожалуйста, попробуйте позже.');
+        console.error('Ошибка загрузки упражнения:', error);
+      }
+    }
+
+    // Отображение упражнения на странице
+    function displayExercise(exercise) {
+      const exerciseContainer = document.getElementById('exercise-container');
+      
+      // Преобразуем markdown в HTML, если описание в формате markdown
+      const descriptionHtml = marked.parse(exercise.description_md || '');
+      
+      let html = `
+        <h2>${exercise.title}</h2>
+        <p class="exercise-info">
+          Порядок: ${exercise.order} | 
+          Создано: ${formatDate(exercise.created_at)}
+        </p>
+      `;
+      
+      // Если у упражнения есть связанный урок, добавляем ссылку на него
+      if (exercise.lesson_id) {
+        html += `
+          <a href="/lesson.html?id=${exercise.lesson_id}" class="lesson-link">
+            Связанный урок #${exercise.lesson_id}
+          </a>
+        `;
+      }
+      
+      html += `
+        <div class="exercise-description">
+          ${descriptionHtml}
+        </div>
+      `;
+      
+      exerciseContainer.innerHTML = html;
+    }
+
+    // Инициализация редактора SQL-кода
+    function initSqlEditor(initialCode) {
+      sqlEditor = CodeMirror(document.getElementById('sql-editor'), {
+        value: initialCode,
+        mode: 'text/x-sql',
+        lineNumbers: true,
+        indentWithTabs: false,
+        tabSize: 2,
+        indentUnit: 2,
+        autoCloseBrackets: true,
+        matchBrackets: true,
+        theme: 'default'
+      });
+    }
+
+    // Выполнение SQL-кода
+    async function runSqlCode() {
+      try {
+        const sqlCode = sqlEditor.getValue();
+        
+        if (!sqlCode.trim()) {
+          showResultMessage('Пожалуйста, введите SQL-запрос.', 'error');
+          document.getElementById('result-container').classList.add('visible');
+          return;
+        }
+        
+        // Показываем сообщение о загрузке
+        showResultMessage('Выполнение запроса...', 'info');
+        document.getElementById('result-container').classList.add('visible');
+        document.getElementById('result-meta').style.display = 'none';
+        document.getElementById('result-data').innerHTML = '';
+        
+        // Отправляем SQL-код на сервер
+        const result = await exercisesApi.runSql(exerciseId, sqlCode);
+        
+        // Обрабатываем результат
+        if (result.error) {
+          showResultMessage(`Ошибка: ${result.error}`, 'error');
+          document.getElementById('result-data').innerHTML = '';
+          return;
+        }
+        
+        // Показываем метаданные о результате
+        document.getElementById('result-meta').style.display = 'flex';
+        document.getElementById('execution-time').textContent = result.time_ms;
+        document.getElementById('rows-count').textContent = result.rows ? result.rows.length : 0;
+        
+        // Отображаем результат запроса
+        if (result.is_correct) {
+          showResultMessage('Поздравляем! Упражнение выполнено верно!', 'success');
+        } else {
+          showResultMessage('Запрос выполнен успешно, но результат не соответствует ожидаемому.', 'error');
+        }
+        
+        // Отображаем данные в таблице
+        displayResultData(result.rows);
+      } catch (error) {
+        showResultMessage('Произошла ошибка при выполнении запроса. Попробуйте еще раз.', 'error');
+        console.error('Ошибка выполнения SQL:', error);
+      }
+    }
+
+    // Отображение результатов запроса
+    function displayResultData(rows) {
+      const resultDataContainer = document.getElementById('result-data');
+      
+      if (!rows || rows.length === 0) {
+        resultDataContainer.innerHTML = '<p>Запрос не вернул результатов.</p>';
+        return;
+      }
+      
+      // Получаем заголовки таблицы (имена полей)
+      const headers = Object.keys(rows[0]);
+      
+      // Создаем HTML для таблицы результатов
+      let tableHtml = '<div style="overflow-x: auto;"><table class="result-table">';
+      
+      // Добавляем заголовки
+      tableHtml += '<thead><tr>';
+      headers.forEach(header => {
+        tableHtml += `<th>${header}</th>`;
+      });
+      tableHtml += '</tr></thead>';
+      
+      // Добавляем строки данных
+      tableHtml += '<tbody>';
+      rows.forEach(row => {
+        tableHtml += '<tr>';
+        headers.forEach(header => {
+          const value = row[header];
+          // Проверяем, если значение null или undefined
+          tableHtml += `<td>${value !== null && value !== undefined ? value : 'NULL'}</td>`;
+        });
+        tableHtml += '</tr>';
+      });
+      tableHtml += '</tbody></table></div>';
+      
+      resultDataContainer.innerHTML = tableHtml;
+    }
+
+    // Сброс редактора SQL к начальному состоянию
+    function resetEditor() {
+      if (currentExercise && sqlEditor) {
+        sqlEditor.setValue(currentExercise.init_sql || '-- Введите ваш SQL-запрос здесь\n');
+        
+        // Скрываем результаты
+        document.getElementById('result-container').classList.remove('visible');
+      }
+    }
+
+    // Показать сообщение в блоке результатов
+    function showResultMessage(message, type) {
+      const messageContainer = document.getElementById('result-message');
+      messageContainer.textContent = message;
+      messageContainer.className = 'result-message';
+      if (type) {
+        messageContainer.classList.add(type);
+      }
+    }
+
+    // Вспомогательные функции
+    function formatDate(dateString) {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('ru-RU', { 
+        day: '2-digit', 
+        month: '2-digit', 
+        year: 'numeric' 
+      });
+    }
+
+    function showError(message) {
+      const exerciseContainer = document.getElementById('exercise-container');
+      exerciseContainer.innerHTML = `<div class="error">${message}</div>`;
+    }
+  </script>
+</body>
+</html>

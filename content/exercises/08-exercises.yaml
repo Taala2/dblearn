@@ -1,0 +1,180 @@
+- title: "Нумерация строк с ROW_NUMBER"
+  description_md: |
+    # Нумерация строк с ROW_NUMBER
+    
+    В этом упражнении вы научитесь использовать оконную функцию ROW_NUMBER() для нумерации строк в результате запроса.
+    
+    ## База данных
+    
+    Вы работаете с таблицей `orders`, которая содержит информацию о заказах:
+    
+    | id | customer_id | order_date | total_amount | status |
+    |----|-------------|------------|--------------|--------|
+    | 1  | 1           | 2023-01-15 | 47000 | Доставлен |
+    | 2  | 2           | 2023-01-16 | 25000 | В пути |
+    | 3  | 3           | 2023-01-17 | 7000 | Отменён |
+    | 4  | 1           | 2023-01-18 | 1000 | Доставлен |
+    | 5  | 4           | 2023-01-18 | 5000 | Отменён |
+    | 6  | 2           | 2023-01-19 | 12000 | Доставлен |
+    | 7  | 3           | 2023-01-20 | 8000 | В пути |
+    | 8  | 1           | 2023-01-21 | 30000 | Доставлен |
+    
+    ## Задание
+    
+    Напишите SQL-запрос, который пронумерует заказы каждого клиента по дате (от самого раннего к самому позднему).
+    
+    Результат должен содержать следующие столбцы:
+    - `customer_id` - ID клиента
+    - `order_id` - ID заказа
+    - `order_date` - дата заказа
+    - `total_amount` - сумма заказа
+    - `order_number` - порядковый номер заказа для данного клиента
+    
+    Результат должен быть отсортирован по ID клиента и дате заказа.
+  init_sql: |
+    -- Создаём таблицу orders
+    CREATE TABLE orders (
+      id INTEGER PRIMARY KEY,
+      customer_id INTEGER NOT NULL,
+      order_date DATE NOT NULL,
+      total_amount INTEGER NOT NULL,
+      status TEXT NOT NULL
+    );
+    -- Вставляем тестовые данные
+    INSERT INTO orders (id, customer_id, order_date, total_amount, status) VALUES
+      (1, 1, '2023-01-15', 47000, 'Доставлен'),
+      (2, 2, '2023-01-16', 25000, 'В пути'),
+      (3, 3, '2023-01-17', 7000, 'Отменён'),
+      (4, 1, '2023-01-18', 1000, 'Доставлен'),
+      (5, 4, '2023-01-18', 5000, 'Отменён'),
+      (6, 2, '2023-01-19', 12000, 'Доставлен'),
+      (7, 3, '2023-01-20', 8000, 'В пути'),
+      (8, 1, '2023-01-21', 30000, 'Доставлен');
+  expected_sql: |
+    SELECT 
+      customer_id,
+      id AS order_id,
+      order_date,
+      total_amount,
+      ROW_NUMBER() OVER (PARTITION BY customer_id ORDER BY order_date) AS order_number
+    FROM orders
+    ORDER BY customer_id, order_date;
+  order: 1
+  lesson_id: 8
+
+- title: "Расчет нарастающего итога с оконными функциями"
+  description_md: |
+    # Расчет нарастающего итога с оконными функциями
+    
+    В этом упражнении вы научитесь использовать оконные функции для расчета нарастающего итога.
+    
+    ## База данных
+    
+    Вы работаете с таблицей `orders`, которая содержит информацию о заказах (см. предыдущее упражнение).
+    
+    ## Задание
+    
+    Напишите SQL-запрос, который для каждого заказа клиента рассчитает:
+    1. Сумму текущего заказа
+    2. Общую сумму всех предыдущих заказов этого клиента (включая текущий)
+    
+    Результат должен содержать следующие столбцы:
+    - `customer_id` - ID клиента
+    - `order_id` - ID заказа
+    - `order_date` - дата заказа
+    - `total_amount` - сумма текущего заказа
+    - `running_total` - нарастающий итог (общая сумма всех заказов клиента до и включая текущий)
+    
+    Результат должен быть отсортирован по ID клиента и дате заказа.
+  init_sql: |
+    -- Создаём таблицу orders
+    CREATE TABLE orders (
+      id INTEGER PRIMARY KEY,
+      customer_id INTEGER NOT NULL,
+      order_date DATE NOT NULL,
+      total_amount INTEGER NOT NULL,
+      status TEXT NOT NULL
+    );
+    -- Вставляем тестовые данные
+    INSERT INTO orders (id, customer_id, order_date, total_amount, status) VALUES
+      (1, 1, '2023-01-15', 47000, 'Доставлен'),
+      (2, 2, '2023-01-16', 25000, 'В пути'),
+      (3, 3, '2023-01-17', 7000, 'Отменён'),
+      (4, 1, '2023-01-18', 1000, 'Доставлен'),
+      (5, 4, '2023-01-18', 5000, 'Отменён'),
+      (6, 2, '2023-01-19', 12000, 'Доставлен'),
+      (7, 3, '2023-01-20', 8000, 'В пути'),
+      (8, 1, '2023-01-21', 30000, 'Доставлен');
+  expected_sql: |
+    SELECT 
+      customer_id,
+      id AS order_id,
+      order_date,
+      total_amount,
+      SUM(total_amount) OVER (
+        PARTITION BY customer_id 
+        ORDER BY order_date
+        ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+      ) AS running_total
+    FROM orders
+    ORDER BY customer_id, order_date;
+  order: 2
+  lesson_id: 8
+
+- title: "Сравнение с предыдущим значением с LAG"
+  description_md: |
+    # Сравнение с предыдущим значением с LAG
+    
+    В этом упражнении вы научитесь использовать оконную функцию LAG() для сравнения текущего значения с предыдущим.
+    
+    ## База данных
+    
+    Вы работаете с таблицей `orders`, которая содержит информацию о заказах (см. предыдущие упражнения).
+    
+    ## Задание
+    
+    Напишите SQL-запрос, который для каждого заказа клиента рассчитает:
+    1. Сумму текущего заказа
+    2. Сумму предыдущего заказа этого клиента
+    3. Разницу между суммой текущего и предыдущего заказа
+    
+    Результат должен содержать следующие столбцы:
+    - `customer_id` - ID клиента
+    - `order_id` - ID заказа
+    - `order_date` - дата заказа
+    - `total_amount` - сумма текущего заказа
+    - `prev_amount` - сумма предыдущего заказа клиента (NULL, если это первый заказ)
+    - `amount_diff` - разница между текущей и предыдущей суммой (NULL, если это первый заказ)
+    
+    Результат должен быть отсортирован по ID клиента и дате заказа.
+  init_sql: |
+    -- Создаём таблицу orders
+    CREATE TABLE orders (
+      id INTEGER PRIMARY KEY,
+      customer_id INTEGER NOT NULL,
+      order_date DATE NOT NULL,
+      total_amount INTEGER NOT NULL,
+      status TEXT NOT NULL
+    );
+    -- Вставляем тестовые данные
+    INSERT INTO orders (id, customer_id, order_date, total_amount, status) VALUES
+      (1, 1, '2023-01-15', 47000, 'Доставлен'),
+      (2, 2, '2023-01-16', 25000, 'В пути'),
+      (3, 3, '2023-01-17', 7000, 'Отменён'),
+      (4, 1, '2023-01-18', 1000, 'Доставлен'),
+      (5, 4, '2023-01-18', 5000, 'Отменён'),
+      (6, 2, '2023-01-19', 12000, 'Доставлен'),
+      (7, 3, '2023-01-20', 8000, 'В пути'),
+      (8, 1, '2023-01-21', 30000, 'Доставлен');
+  expected_sql: |
+    SELECT 
+      customer_id,
+      id AS order_id,
+      order_date,
+      total_amount,
+      LAG(total_amount) OVER (PARTITION BY customer_id ORDER BY order_date) AS prev_amount,
+      total_amount - LAG(total_amount) OVER (PARTITION BY customer_id ORDER BY order_date) AS amount_diff
+    FROM orders
+    ORDER BY customer_id, order_date;
+  order: 3
+  lesson_id: 8

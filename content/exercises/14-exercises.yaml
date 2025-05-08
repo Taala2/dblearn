@@ -1,0 +1,271 @@
+- title: "Анализ плана запроса с EXPLAIN"
+  description_md: |
+    # Анализ плана запроса с EXPLAIN
+    
+    В этом упражнении вы научитесь использовать оператор EXPLAIN для анализа плана выполнения запроса.
+    
+    ## База данных
+    
+    У вас есть база данных интернет-магазина с таблицами:
+    
+    ```sql
+    CREATE TABLE customers (
+      id INTEGER PRIMARY KEY,
+      first_name TEXT,
+      last_name TEXT,
+      email TEXT,
+      country TEXT
+    );
+    
+    CREATE TABLE orders (
+      id INTEGER PRIMARY KEY,
+      customer_id INTEGER,
+      order_date DATE,
+      total_amount NUMERIC,
+      status TEXT,
+      FOREIGN KEY (customer_id) REFERENCES customers(id)
+    );
+    ```
+    
+    ## Задание
+    
+    1. Напишите запрос с использованием оператора EXPLAIN ANALYZE для анализа плана выполнения следующего запроса:
+    
+    ```sql
+    SELECT c.first_name, c.last_name, COUNT(o.id) as order_count
+    FROM customers c
+    JOIN orders o ON c.id = o.customer_id
+    WHERE c.country = 'Россия'
+    GROUP BY c.id, c.first_name, c.last_name
+    HAVING COUNT(o.id) > 2
+    ORDER BY order_count DESC;
+    ```
+    
+    2. Объясните, какие индексы можно создать для оптимизации данного запроса.
+  init_sql: |
+    -- Создаём таблицу customers
+    CREATE TABLE customers (
+      id INTEGER PRIMARY KEY,
+      first_name TEXT,
+      last_name TEXT,
+      email TEXT,
+      country TEXT
+    );
+    
+    -- Создаём таблицу orders
+    CREATE TABLE orders (
+      id INTEGER PRIMARY KEY,
+      customer_id INTEGER,
+      order_date DATE,
+      total_amount NUMERIC,
+      status TEXT,
+      FOREIGN KEY (customer_id) REFERENCES customers(id)
+    );
+  expected_sql: |
+    -- 1. Анализ плана выполнения запроса
+    EXPLAIN ANALYZE
+    SELECT c.first_name, c.last_name, COUNT(o.id) as order_count
+    FROM customers c
+    JOIN orders o ON c.id = o.customer_id
+    WHERE c.country = 'Россия'
+    GROUP BY c.id, c.first_name, c.last_name
+    HAVING COUNT(o.id) > 2
+    ORDER BY order_count DESC;
+    
+    -- 2. Индексы для оптимизации запроса
+    -- Индекс для фильтрации по стране
+    CREATE INDEX idx_customers_country ON customers(country);
+    
+    -- Индекс для соединения таблиц
+    CREATE INDEX idx_orders_customer_id ON orders(customer_id);
+  order: 1
+  lesson_id: 14
+
+- title: "Оптимизация запроса с JOIN"
+  description_md: |
+    # Оптимизация запроса с JOIN
+    
+    В этом упражнении вы научитесь оптимизировать запрос с соединением нескольких таблиц.
+    
+    ## База данных
+    
+    У вас есть база данных интернет-магазина с таблицами:
+    
+    ```sql
+    CREATE TABLE customers (
+      id INTEGER PRIMARY KEY,
+      first_name TEXT,
+      last_name TEXT,
+      email TEXT,
+      country TEXT
+    );
+    
+    CREATE TABLE orders (
+      id INTEGER PRIMARY KEY,
+      customer_id INTEGER,
+      order_date DATE,
+      total_amount NUMERIC,
+      status TEXT,
+      FOREIGN KEY (customer_id) REFERENCES customers(id)
+    );
+    
+    CREATE TABLE order_items (
+      id INTEGER PRIMARY KEY,
+      order_id INTEGER,
+      product_id INTEGER,
+      quantity INTEGER,
+      price NUMERIC,
+      FOREIGN KEY (order_id) REFERENCES orders(id),
+      FOREIGN KEY (product_id) REFERENCES products(id)
+    );
+    
+    CREATE TABLE products (
+      id INTEGER PRIMARY KEY,
+      name TEXT,
+      price NUMERIC,
+      category_id INTEGER
+    );
+    ```
+    
+    ## Задание
+    
+    Дан следующий запрос, который выбирает 10 самых дорогих заказов с детализацией по товарам:
+    
+    ```sql
+    SELECT 
+        o.id AS order_id,
+        c.first_name || ' ' || c.last_name AS customer_name,
+        o.order_date,
+        p.name AS product_name,
+        oi.quantity,
+        oi.price,
+        oi.quantity * oi.price AS item_total
+    FROM orders o
+    JOIN customers c ON o.customer_id = c.id
+    JOIN order_items oi ON o.id = oi.order_id
+    JOIN products p ON oi.product_id = p.id
+    WHERE o.status = 'Доставлен'
+    ORDER BY o.total_amount DESC
+    LIMIT 10;
+    ```
+    
+    Напишите SQL-запросы для создания индексов, которые помогут оптимизировать выполнение этого запроса.
+    
+    Для максимальной эффективности необходимо создать минимум 3 индекса.
+  init_sql: |
+    -- Создаём таблицы
+    CREATE TABLE customers (
+      id INTEGER PRIMARY KEY,
+      first_name TEXT,
+      last_name TEXT,
+      email TEXT,
+      country TEXT
+    );
+    
+    CREATE TABLE orders (
+      id INTEGER PRIMARY KEY,
+      customer_id INTEGER,
+      order_date DATE,
+      total_amount NUMERIC,
+      status TEXT,
+      FOREIGN KEY (customer_id) REFERENCES customers(id)
+    );
+    
+    CREATE TABLE products (
+      id INTEGER PRIMARY KEY,
+      name TEXT,
+      price NUMERIC,
+      category_id INTEGER
+    );
+    
+    CREATE TABLE order_items (
+      id INTEGER PRIMARY KEY,
+      order_id INTEGER,
+      product_id INTEGER,
+      quantity INTEGER,
+      price NUMERIC,
+      FOREIGN KEY (order_id) REFERENCES orders(id),
+      FOREIGN KEY (product_id) REFERENCES products(id)
+    );
+  expected_sql: |
+    -- Индекс для фильтрации по статусу заказа и сортировки по сумме
+    CREATE INDEX idx_orders_status_total ON orders(status, total_amount DESC);
+    
+    -- Индекс для соединения customers и orders
+    CREATE INDEX idx_orders_customer_id ON orders(customer_id);
+    
+    -- Индекс для соединения orders и order_items
+    CREATE INDEX idx_order_items_order_id ON order_items(order_id);
+    
+    -- Индекс для соединения products и order_items
+    CREATE INDEX idx_order_items_product_id ON order_items(product_id);
+  order: 2
+  lesson_id: 14
+
+- title: "Оптимизация запроса с подзапросом"
+  description_md: |
+    # Оптимизация запроса с подзапросом
+    
+    В этом упражнении вы научитесь переписывать неэффективные запросы с подзапросами.
+    
+    ## База данных
+    
+    У вас есть таблицы `products` и `order_items`, описанные в предыдущем упражнении.
+    
+    ## Задание
+    
+    Дан следующий запрос, который определяет для каждого товара, сколько раз он был заказан и общее количество проданных единиц:
+    
+    ```sql
+    SELECT 
+        p.id,
+        p.name,
+        p.price,
+        (
+            SELECT COUNT(DISTINCT oi.order_id)
+            FROM order_items oi
+            WHERE oi.product_id = p.id
+        ) AS order_count,
+        (
+            SELECT SUM(oi.quantity)
+            FROM order_items oi
+            WHERE oi.product_id = p.id
+        ) AS total_quantity
+    FROM products p
+    WHERE p.category_id = 1
+    ORDER BY total_quantity DESC NULLS LAST;
+    ```
+    
+    Этот запрос неэффективен, так как содержит коррелированные подзапросы, которые выполняются для каждой строки из таблицы products.
+    
+    Перепишите этот запрос, используя JOIN вместо подзапросов, чтобы повысить его производительность.
+  init_sql: |
+    -- Создаём таблицы
+    CREATE TABLE products (
+      id INTEGER PRIMARY KEY,
+      name TEXT,
+      price NUMERIC,
+      category_id INTEGER
+    );
+    
+    CREATE TABLE order_items (
+      id INTEGER PRIMARY KEY,
+      order_id INTEGER,
+      product_id INTEGER,
+      quantity INTEGER,
+      price NUMERIC
+    );
+  expected_sql: |
+    SELECT 
+        p.id,
+        p.name,
+        p.price,
+        COUNT(DISTINCT oi.order_id) AS order_count,
+        SUM(oi.quantity) AS total_quantity
+    FROM products p
+    LEFT JOIN order_items oi ON p.id = oi.product_id
+    WHERE p.category_id = 1
+    GROUP BY p.id, p.name, p.price
+    ORDER BY total_quantity DESC NULLS LAST;
+  order: 3
+  lesson_id: 14

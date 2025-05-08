@@ -1,0 +1,213 @@
+- title: "Создание скалярной функции"
+  description_md: |
+    # Создание скалярной функции
+    
+    В этом упражнении вы научитесь создавать скалярную функцию, которая возвращает одно значение.
+    
+    ## База данных
+    
+    У вас есть таблица `orders` с информацией о заказах:
+    
+    | id | customer_id | order_date | total_amount | status |
+    |----|-------------|------------|--------------|--------|
+    | 1  | 1           | 2023-01-15 | 47000 | Доставлен |
+    | 2  | 2           | 2023-01-16 | 25000 | В пути |
+    | 3  | 3           | 2023-01-17 | 7000 | Отменён |
+    | 4  | 1           | 2023-01-18 | 1000 | Доставлен |
+    | 5  | 4           | 2023-01-18 | 5000 | Отменён |
+    
+    ## Задание
+    
+    Создайте функцию `calculate_total_spent`, которая принимает ID клиента и возвращает общую сумму всех его заказов. 
+    Если у клиента нет заказов, функция должна возвращать 0.
+    
+    Примечание: используйте синтаксис PostgreSQL.
+  init_sql: |
+    -- Создаём таблицу orders
+    CREATE TABLE orders (
+      id INTEGER PRIMARY KEY,
+      customer_id INTEGER NOT NULL,
+      order_date DATE NOT NULL,
+      total_amount INTEGER NOT NULL,
+      status TEXT NOT NULL
+    );
+    
+    -- Вставляем тестовые данные
+    INSERT INTO orders (id, customer_id, order_date, total_amount, status) VALUES
+      (1, 1, '2023-01-15', 47000, 'Доставлен'),
+      (2, 2, '2023-01-16', 25000, 'В пути'),
+      (3, 3, '2023-01-17', 7000, 'Отменён'),
+      (4, 1, '2023-01-18', 1000, 'Доставлен'),
+      (5, 4, '2023-01-18', 5000, 'Отменён');
+  expected_sql: |
+    CREATE OR REPLACE FUNCTION calculate_total_spent(customer_id_param INTEGER)
+    RETURNS INTEGER
+    LANGUAGE SQL
+    AS $$
+      SELECT COALESCE(SUM(total_amount), 0)
+      FROM orders
+      WHERE customer_id = customer_id_param;
+    $$;
+  order: 1
+  lesson_id: 13
+
+- title: "Создание табличной функции"
+  description_md: |
+    # Создание табличной функции
+    
+    В этом упражнении вы научитесь создавать табличную функцию, которая возвращает набор строк.
+    
+    ## База данных
+    
+    У вас есть таблица `products` с информацией о товарах:
+    
+    | id | name | description | price | category_id | supplier_id |
+    |----|------|-------------|-------|-------------|-------------|
+    | 1  | Ноутбук ASUS | Ноутбук для работы | 45000 | 1 | 1 |
+    | 2  | Смартфон Samsung | Смартфон с хорошей камерой | 25000 | 1 | 2 |
+    | 3  | Футболка Nike | Спортивная футболка | 2000 | 2 | 3 |
+    | 4  | Кроссовки Adidas | Спортивная обувь | 5000 | 3 | 3 |
+    | 5  | Книга "SQL для начинающих" | Учебник по SQL | 1000 | 4 | 4 |
+    | 6  | Планшет iPad | Планшет для работы и развлечений | 35000 | 1 | 5 |
+    
+    ## Задание
+    
+    Создайте табличную функцию `get_products_by_category`, которая принимает ID категории и ценовой диапазон 
+    (минимальную и максимальную цену) и возвращает все товары из указанной категории, 
+    цена которых находится в заданном диапазоне.
+    
+    Функция должна возвращать следующие столбцы:
+    - id
+    - name
+    - price
+    - supplier_id
+    
+    Результат должен быть отсортирован по возрастанию цены.
+    
+    Примечание: используйте синтаксис PostgreSQL.
+  init_sql: |
+    -- Создаём таблицу products
+    CREATE TABLE products (
+      id INTEGER PRIMARY KEY,
+      name TEXT NOT NULL,
+      description TEXT,
+      price INTEGER NOT NULL,
+      category_id INTEGER NOT NULL,
+      supplier_id INTEGER NOT NULL
+    );
+    
+    -- Вставляем тестовые данные
+    INSERT INTO products (id, name, description, price, category_id, supplier_id) VALUES
+      (1, 'Ноутбук ASUS', 'Ноутбук для работы', 45000, 1, 1),
+      (2, 'Смартфон Samsung', 'Смартфон с хорошей камерой', 25000, 1, 2),
+      (3, 'Футболка Nike', 'Спортивная футболка', 2000, 2, 3),
+      (4, 'Кроссовки Adidas', 'Спортивная обувь', 5000, 3, 3),
+      (5, 'Книга "SQL для начинающих"', 'Учебник по SQL', 1000, 4, 4),
+      (6, 'Планшет iPad', 'Планшет для работы и развлечений', 35000, 1, 5);
+  expected_sql: |
+    CREATE OR REPLACE FUNCTION get_products_by_category(
+      category_id_param INTEGER,
+      min_price INTEGER,
+      max_price INTEGER
+    )
+    RETURNS TABLE (
+      id INTEGER,
+      name TEXT,
+      price INTEGER,
+      supplier_id INTEGER
+    )
+    LANGUAGE SQL
+    AS $$
+      SELECT id, name, price, supplier_id
+      FROM products
+      WHERE category_id = category_id_param
+        AND price BETWEEN min_price AND max_price
+      ORDER BY price;
+    $$;
+  order: 2
+  lesson_id: 13
+
+- title: "Создание триггера"
+  description_md: |
+    # Создание триггера
+    
+    В этом упражнении вы научитесь создавать триггер для автоматического обновления данных.
+    
+    ## База данных
+    
+    У вас есть таблица `products` с информацией о товарах (см. предыдущее упражнение), и вы хотите добавить отслеживание изменений цен.
+    
+    Вам нужно:
+    1. Создать таблицу `price_history` для хранения истории изменения цен
+    2. Создать триггерную функцию
+    3. Создать триггер, который будет добавлять запись в `price_history` при каждом изменении цены товара
+    
+    ## Задание
+    
+    1. Создайте таблицу `price_history` со следующими полями:
+       - id (SERIAL, PRIMARY KEY)
+       - product_id (INTEGER, NOT NULL)
+       - old_price (INTEGER, NOT NULL)
+       - new_price (INTEGER, NOT NULL)
+       - change_date (TIMESTAMP, NOT NULL, DEFAULT CURRENT_TIMESTAMP)
+    
+    2. Создайте триггерную функцию `log_price_change()`, которая будет добавлять запись 
+       в `price_history` при изменении цены товара.
+    
+    3. Создайте триггер `track_price_changes`, который будет срабатывать BEFORE UPDATE на таблице `products`
+       и вызывать функцию `log_price_change()`, если цена товара изменилась.
+    
+    Примечание: используйте синтаксис PostgreSQL.
+  init_sql: |
+    -- Создаём таблицу products
+    CREATE TABLE products (
+      id INTEGER PRIMARY KEY,
+      name TEXT NOT NULL,
+      description TEXT,
+      price INTEGER NOT NULL,
+      category_id INTEGER NOT NULL,
+      supplier_id INTEGER NOT NULL
+    );
+    
+    -- Вставляем тестовые данные
+    INSERT INTO products (id, name, description, price, category_id, supplier_id) VALUES
+      (1, 'Ноутбук ASUS', 'Ноутбук для работы', 45000, 1, 1),
+      (2, 'Смартфон Samsung', 'Смартфон с хорошей камерой', 25000, 1, 2),
+      (3, 'Футболка Nike', 'Спортивная футболка', 2000, 2, 3),
+      (4, 'Кроссовки Adidas', 'Спортивная обувь', 5000, 3, 3),
+      (5, 'Книга "SQL для начинающих"', 'Учебник по SQL', 1000, 4, 4),
+      (6, 'Планшет iPad', 'Планшет для работы и развлечений', 35000, 1, 5);
+  expected_sql: |
+    -- Создаём таблицу price_history
+    CREATE TABLE price_history (
+      id SERIAL PRIMARY KEY,
+      product_id INTEGER NOT NULL,
+      old_price INTEGER NOT NULL,
+      new_price INTEGER NOT NULL,
+      change_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
+    
+    -- Создаём триггерную функцию
+    CREATE OR REPLACE FUNCTION log_price_change()
+    RETURNS TRIGGER
+    LANGUAGE plpgsql
+    AS $$
+    BEGIN
+      -- Проверяем, изменилась ли цена
+      IF NEW.price <> OLD.price THEN
+        -- Записываем изменение в историю
+        INSERT INTO price_history (product_id, old_price, new_price)
+        VALUES (OLD.id, OLD.price, NEW.price);
+      END IF;
+      
+      RETURN NEW;
+    END;
+    $$;
+    
+    -- Создаём триггер
+    CREATE TRIGGER track_price_changes
+    BEFORE UPDATE ON products
+    FOR EACH ROW
+    EXECUTE FUNCTION log_price_change();
+  order: 3
+  lesson_id: 13

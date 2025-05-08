@@ -1,0 +1,143 @@
+- title: "Создание пользователей и ролей"
+  description_md: |
+    # Создание пользователей и ролей
+    
+    В этом упражнении вы научитесь создавать пользователей и роли, а также управлять правами доступа.
+    
+    ## Задание
+    
+    Представьте, что вы настраиваете базу данных для интернет-магазина. Вам нужно создать следующие роли и пользователей:
+    
+    1. Роль `admin_role` с полными правами на все таблицы
+    2. Роль `analyst_role` с правами только на чтение всех таблиц
+    3. Роль `sales_role` с правами на чтение всех таблиц и на изменение таблиц `orders` и `order_items`
+    4. Пользователя `db_admin` с ролью `admin_role`
+    5. Пользователя `data_analyst` с ролью `analyst_role`
+    6. Пользователя `sales_manager` с ролью `sales_role`
+    
+    Напишите SQL-запросы для создания этих ролей и пользователей и для назначения соответствующих прав.
+    
+    Примечание: используйте синтаксис PostgreSQL.
+  init_sql: |
+    -- Предположим, что у нас есть следующие таблицы:
+    CREATE TABLE customers (
+      id SERIAL PRIMARY KEY,
+      name TEXT,
+      email TEXT,
+      phone TEXT
+    );
+    
+    CREATE TABLE products (
+      id SERIAL PRIMARY KEY,
+      name TEXT,
+      price NUMERIC,
+      description TEXT
+    );
+    
+    CREATE TABLE orders (
+      id SERIAL PRIMARY KEY,
+      customer_id INTEGER REFERENCES customers(id),
+      order_date TIMESTAMP,
+      total_amount NUMERIC
+    );
+    
+    CREATE TABLE order_items (
+      id SERIAL PRIMARY KEY,
+      order_id INTEGER REFERENCES orders(id),
+      product_id INTEGER REFERENCES products(id),
+      quantity INTEGER,
+      price NUMERIC
+    );
+  expected_sql: |
+    -- Создание ролей
+    CREATE ROLE admin_role;
+    CREATE ROLE analyst_role;
+    CREATE ROLE sales_role;
+    
+    -- Назначение прав для admin_role
+    GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO admin_role;
+    GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO admin_role;
+    
+    -- Назначение прав для analyst_role
+    GRANT SELECT ON ALL TABLES IN SCHEMA public TO analyst_role;
+    
+    -- Назначение прав для sales_role
+    GRANT SELECT ON ALL TABLES IN SCHEMA public TO sales_role;
+    GRANT INSERT, UPDATE, DELETE ON orders, order_items TO sales_role;
+    
+    -- Создание пользователей
+    CREATE USER db_admin WITH PASSWORD 'secure_password1';
+    CREATE USER data_analyst WITH PASSWORD 'secure_password2';
+    CREATE USER sales_manager WITH PASSWORD 'secure_password3';
+    
+    -- Назначение ролей пользователям
+    GRANT admin_role TO db_admin;
+    GRANT analyst_role TO data_analyst;
+    GRANT sales_role TO sales_manager;
+  order: 1
+  lesson_id: 15
+
+- title: "Создание представления для ограничения доступа к данным"
+  description_md: |
+    # Создание представления для ограничения доступа к данным
+    
+    В этом упражнении вы научитесь использовать представления (views) для ограничения доступа к конфиденциальным данным.
+    
+    ## База данных
+    
+    У вас есть таблица `customers` с информацией о клиентах:
+    
+    | id | first_name | last_name | email | phone | address | credit_card |
+    |----|------------|-----------|-------|-------|---------|-------------|
+    | 1  | Иван       | Иванов    | ivan@example.com | +7-123-456-7890 | Москва, ул. Примерная, 1 | 4111-1111-1111-1111 |
+    | 2  | Анна       | Петрова   | anna@example.com | +7-234-567-8901 | Санкт-Петербург, пр. Образцовый, 2 | 5222-2222-2222-2222 |
+    | 3  | Алексей    | Смирнов   | alex@example.com | +7-345-678-9012 | Екатеринбург, ул. Тестовая, 3 | 3333-3333-3333-3333 |
+    
+    ## Задание
+    
+    В вашей компании есть отдел маркетинга, которому нужен доступ к контактной информации клиентов, но они не должны видеть полные номера кредитных карт и полные адреса.
+    
+    1. Создайте представление `marketing_customer_view`, которое включает все столбцы из таблицы `customers`, но:
+       - Маскирует номера кредитных карт, отображая только последние 4 цифры (например, '****-****-****-1111')
+       - Показывает только город из адреса клиента
+       - Показывает полное имя клиента в одном столбце `full_name`
+    
+    2. Предоставьте права на чтение этого представления пользователю `marketing_user`.
+    
+    Примечание: используйте синтаксис PostgreSQL.
+  init_sql: |
+    -- Создаём таблицу customers
+    CREATE TABLE customers (
+      id SERIAL PRIMARY KEY,
+      first_name TEXT NOT NULL,
+      last_name TEXT NOT NULL,
+      email TEXT NOT NULL,
+      phone TEXT,
+      address TEXT,
+      credit_card TEXT
+    );
+    
+    -- Вставляем тестовые данные
+    INSERT INTO customers (first_name, last_name, email, phone, address, credit_card) VALUES
+      ('Иван', 'Иванов', 'ivan@example.com', '+7-123-456-7890', 'Москва, ул. Примерная, 1', '4111-1111-1111-1111'),
+      ('Анна', 'Петрова', 'anna@example.com', '+7-234-567-8901', 'Санкт-Петербург, пр. Образцовый, 2', '5222-2222-2222-2222'),
+      ('Алексей', 'Смирнов', 'alex@example.com', '+7-345-678-9012', 'Екатеринбург, ул. Тестовая, 3', '3333-3333-3333-3333');
+    
+    -- Создаём пользователя marketing_user
+    CREATE USER marketing_user;
+  expected_sql: |
+    -- Создание представления с маскированными данными
+    CREATE VIEW marketing_customer_view AS
+    SELECT
+      id,
+      first_name || ' ' || last_name AS full_name,
+      email,
+      phone,
+      SPLIT_PART(address, ',', 1) AS city,
+      '****-****-****-' || RIGHT(credit_card, 4) AS masked_credit_card
+    FROM customers;
+    
+    -- Предоставление прав на чтение представления
+    GRANT SELECT ON marketing_customer_view TO marketing_user;
+  order: 2
+  lesson_id: 15

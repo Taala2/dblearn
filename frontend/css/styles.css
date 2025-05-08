@@ -1,0 +1,415 @@
+:root {
+  --primary-color: #4a6fa5;
+  --secondary-color: #166088;
+  --accent-color: #4daa57;
+  --light-color: #f8f9fa;
+  --dark-color: #343a40;
+  --success-color: #28a745;
+  --warning-color: #ffc107;
+  --danger-color: #dc3545;
+  --border-radius: 8px;
+  --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+  color: var(--primary-color);
+  margin-bottom: 1rem;
+}
+
+body {
+  font-family: 'Roboto', 'Segoe UI', sans-serif;
+  line-height: 1.7;
+  color: var(--dark-color);
+  background-color: #f0f2f5;
+}
+
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* Стили хедера */
+header {
+  background-color: #3b5998;
+  color: white;
+  padding: 1rem 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+nav h1 {
+  font-size: 1.8rem;
+  font-weight: 600;
+}
+
+.nav-links {
+  display: flex;
+  list-style: none;
+}
+
+.nav-links li {
+  margin-left: 1.5rem;
+}
+
+.nav-links a {
+  color: white;
+  text-decoration: none;
+  font-weight: 500;
+  padding: 0.5rem 0;
+  transition: color 0.3s;
+}
+
+.nav-links a:hover {
+  color: #ddd;
+}
+
+.nav-links a.active {
+  border-bottom: 2px solid white;
+}
+
+/* Стили основного контента */
+main {
+  padding: 2rem 0;
+  min-height: calc(100vh - 140px);
+}
+
+h2 {
+  margin-bottom: 1.5rem;
+  color: #333;
+}
+
+/* Стили карточек уроков */
+.lessons-list, .exercises-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.lesson-card, .exercise-card {
+  background-color: white;
+  border-radius: var(--border-radius);
+  padding: 1.5rem;
+  box-shadow: var(--box-shadow);
+  transition: transform 0.3s, box-shadow 0.3s;
+  border-top: 4px solid var(--primary-color);
+  display: flex;
+  flex-direction: column;
+}
+
+.lesson-card:hover, .exercise-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.card-body {
+  flex: 1;
+}
+
+.card-footer {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: space-between;
+}
+
+.lesson-card h3, .exercise-card h3 {
+  margin-bottom: 0.8rem;
+  color: #3b5998;
+}
+
+.lesson-info, .exercise-info {
+  font-size: 0.85rem;
+  color: #666;
+  margin-bottom: 1rem;
+}
+
+.lesson-preview, .exercise-preview {
+  margin-bottom: 1.2rem;
+  color: #444;
+  line-height: 1.5;
+}
+
+/* Стили кнопок */
+.btn {
+  display: inline-block;
+  font-weight: 500;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: middle;
+  user-select: none;
+  border: 1px solid transparent;
+  padding: 0.5rem 1rem;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  border-radius: var(--border-radius);
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+}
+
+.btn:hover {
+  opacity: 0.9;
+  transform: translateY(-2px);
+}
+
+.btn:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.btn-outline {
+  background-color: transparent;
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+.btn-outline:hover {
+  background-color: #f0f2f5;
+}
+
+/* Стили пагинации */
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+.pagination-btn {
+  margin: 0 0.25rem;
+  padding: 0.5rem 1rem;
+  background-color: white;
+  color: #3b5998;
+  border: 1px solid #ddd;
+}
+
+.pagination-btn.active {
+  background-color: #3b5998;
+  color: white;
+  border-color: #3b5998;
+}
+
+/* Стили для сообщений */
+.loading, .error {
+  text-align: center;
+  padding: 2rem;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.error {
+  color: #d32f2f;
+}
+
+/* Стили футера */
+footer {
+  background-color: #f0f2f5;
+  padding: 1.5rem 0;
+  text-align: center;
+  color: #666;
+  border-top: 1px solid #ddd;
+}
+
+/* Стили для страницы отдельного урока */
+.lesson-content, .exercise-content {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.lesson-navigation, .exercise-navigation {
+  margin-bottom: 1.5rem;
+}
+
+.lesson-navigation-bottom {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 2rem;
+}
+
+.lesson-body {
+  margin-top: 1.5rem;
+}
+
+.lesson-body h1, .lesson-body h2, .lesson-body h3 {
+  margin-top: 1.5rem;
+  margin-bottom: 1rem;
+  color: #3b5998;
+}
+
+.lesson-body p {
+  margin-bottom: 1rem;
+}
+
+.lesson-body ul, .lesson-body ol {
+  margin-left: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.lesson-body pre {
+  background-color: #f5f5f5;
+  padding: 1rem;
+  border-radius: 4px;
+  overflow-x: auto;
+  margin-bottom: 1rem;
+}
+
+.lesson-body code {
+  background-color: #f5f5f5;
+  padding: 0.2rem 0.4rem;
+  border-radius: 3px;
+  font-family: 'Consolas', 'Monaco', monospace;
+}
+
+.lesson-body blockquote {
+  border-left: 4px solid #3b5998;
+  padding-left: 1rem;
+  color: #666;
+  margin-bottom: 1rem;
+}
+
+/* Стили для главной страницы */
+.hero-section {
+  text-align: center;
+  padding: 3rem 0;
+}
+
+.hero-text {
+  max-width: 800px;
+  margin: 0 auto 2rem;
+  font-size: 1.2rem;
+  color: #555;
+}
+
+.cta-buttons {
+  margin-top: 2rem;
+}
+
+.features-section {
+  padding: 2rem 0;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.feature-card {
+  padding: 1.5rem;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.feature-card h3 {
+  color: #3b5998;
+  margin-bottom: 1rem;
+}
+
+/* Стили для упражнений */
+.lesson-filter-link {
+  background-color: #e9ecef;
+  padding: 0.2rem 0.5rem;
+  border-radius: 3px;
+  text-decoration: none;
+  color: #3b5998;
+  font-weight: 500;
+}
+
+.lesson-link {
+  margin: 0.5rem 0 1rem;
+  display: inline-block;
+}
+
+/* Адаптивные стили */
+@media (max-width: 768px) {
+  .lessons-list, .exercises-list {
+    grid-template-columns: 1fr;
+  }
+  
+  .lesson-navigation-bottom {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .nav {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .nav h1 {
+    margin-bottom: 0.5rem;
+  }
+  
+  .feature-card {
+    padding: 1rem;
+  }
+
+  .container {
+    padding: 0 15px;
+  }
+  
+  .navbar {
+    flex-direction: column;
+  }
+  
+  .lessons-list, .exercises-list {
+    grid-template-columns: 1fr;
+  }
+  
+  .card-footer {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .btn {
+    width: 100%;
+  }
+}
+
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+  animation: fadeIn 0.5s ease-out;
+}
+
+.lesson-card, .exercise-card {
+  animation: fadeIn 0.5s ease-out;
+  animation-fill-mode: both;
+}
+
+.lessons-list > *:nth-child(1) { animation-delay: 0.1s; }
+.lessons-list > *:nth-child(2) { animation-delay: 0.2s; }
+.lessons-list > *:nth-child(3) { animation-delay: 0.3s; }
+/* и так далее */
