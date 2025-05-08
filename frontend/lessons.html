@@ -3,25 +3,26 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Обучение SQL - Уроки</title>
-  <link rel="stylesheet" href="/css/styles.css">
+  <title>DB Learn - Уроки</title>
+  <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
   <header>
-    <nav class="navbar">
-      <div class="container">
-        <div class="navbar-brand">
-          <h1>SQL Обучение</h1>
+    <div class="container">
+      <nav class="main-nav">
+        <div class="logo">
+          <a href="/">
+            <span class="logo-text">Learn</span>
+          </a>
         </div>
-        <div class="navbar-menu">
-          <ul class="nav-links">
-            <li><a href="/" class="nav-link">Главная</a></li>
-            <li><a href="/lessons.html" class="nav-link">Уроки</a></li>
-            <li><a href="/exercises.html" class="nav-link">Упражнения</a></li>
-          </ul>
-        </div>
-      </div>
-    </nav>
+        <ul class="nav-links">
+          <li><a href="/">Главная</a></li>
+          <li><a href="/lessons.html" class="active">Уроки</a></li>
+          <li><a href="/exercises.html">Упражнения</a></li>
+          <li><a href="/api.html">API</a></li>
+        </ul>
+      </nav>
+    </div>
   </header>
 
   <main class="container">
@@ -41,11 +42,35 @@
 
   <footer>
     <div class="container">
-      <p>&copy; 2025 Обучение SQL</p>
+      <div class="footer-content">
+        <div class="footer-logo">
+          <span class="logo-text">Learn</span>
+          <p>Интерактивная платформа для изучения SQL</p>
+        </div>
+        <div class="footer-links">
+          <div class="footer-column">
+            <h4>Обучение</h4>
+            <ul>
+              <li><a href="/lessons.html">Уроки</a></li>
+              <li><a href="/exercises.html">Упражнения</a></li>
+            </ul>
+          </div>
+          <div class="footer-column">
+            <h4>Ресурсы</h4>
+            <ul>
+              <li><a href="/api.html">API</a></li>
+              <li><a href="/faq.html">FAQ</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2025 DB Learn. Все права защищены.</p>
+      </div>
     </div>
   </footer>
 
-  <!-- Тип "module" позволяет использовать ES модули и import/export -->
-  <script type="module" src="/js/lessons.js"></script>
+
+  <script type="module" src="js/lessons.js"></script>
 </body>
 </html>

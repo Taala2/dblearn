@@ -27,7 +27,6 @@ app.include_router(lessons.router, prefix="/lessons", tags=["lessons"])
 app.include_router(exercises.router, prefix="/exercises", tags=["exercises"])
 app.include_router(runner.router, prefix="/exercises", tags=["runner"])
 
-# Монтируем статические файлы
 app.mount("/css", StaticFiles(directory="frontend/css"), name="css")
 app.mount("/js", StaticFiles(directory="frontend/js"), name="js")
 

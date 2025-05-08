@@ -3,37 +3,109 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Обучение SQL - Урок</title>
-  <link rel="stylesheet" href="/css/styles.css">
-  <!-- Добавляем библиотеку для отображения markdown -->
+  <title>Просмотр урока - DB Learn</title>
+  <link rel="stylesheet" href="css/styles.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
-</head>
-<body>
+  
+  <!-- Добавляем стили для кнопок навигации -->
+  <style>
+    /* Стили для блока навигации между уроками */
+    .lesson-navigation-bottom {
+      display: flex;
+      justify-content: space-between;
+      margin: 30px 0;
+      width: 100%;
+    }
+    
+    /* Контейнеры для кнопок */
+    #prev-lesson, #next-lesson {
+      flex: 0 0 48%; /* Фиксированная ширина для каждого контейнера */
+    }
+    
+    /* Стили для самих кнопок */
+    #prev-lesson a, #next-lesson a {
+      display: block;
+      width: 100%;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      padding: 12px 15px;
+      border-radius: 4px;
+      box-sizing: border-box;
+      transition: background-color 0.3s, border-color 0.3s;
+    }
+    
+    /* Стиль для кнопки "Предыдущий урок" */
+    #prev-lesson a {
+      text-align: left;
+    }
+    
+    /* Стиль для кнопки "Следующий урок" */
+    #next-lesson a {
+      text-align: right;
+    }
+    
+    /* Создаем пустой элемент, если нет предыдущего/следующего урока */
+    .empty-navigation {
+      flex: 0 0 48%;
+    }
+    
+    /* Адаптация для мобильных устройств */
+    @media (max-width: 768px) {
+      .lesson-navigation-bottom {
+        flex-direction: column;
+        gap: 10px;
+      }
+      
+      #prev-lesson, #next-lesson {
+        flex: 0 0 auto;
+        width: 100%;
+      }
+      
+      #prev-lesson a, #next-lesson a {
+        text-align: center;
+      }
+    }
+  </style>
   <header>
-    <nav class="navbar">
-      <div class="container">
-        <div class="navbar-brand">
-          <h1>SQL Обучение</h1>
+    <div class="container">
+      <nav class="main-nav">
+        <div class="logo">
+          <a href="/">
+            <span class="logo-text">Learn</span>
+          </a>
         </div>
-        <div class="navbar-menu">
-          <ul class="nav-links">
-            <li><a href="/" class="nav-link">Главная</a></li>
-            <li><a href="/lessons.html" class="nav-link">Уроки</a></li>
-            <li><a href="/exercises.html" class="nav-link">Упражнения</a></li>
-          </ul>
-        </div>
-      </div>
-    </nav>
+        <ul class="nav-links">
+          <li><a href="/">Главная</a></li>
+          <li><a href="lessons.html" class="active">Уроки</a></li>
+          <li><a href="exercises.html">Упражнения</a></li>
+          <li><a href="api.html">API</a></li>
+        </ul>
+      </nav>
+    </div>
   </header>
 
   <main class="container">
     <section class="lesson-content">
       <div class="lesson-navigation">
-        <a href="/lessons.html" class="btn btn-outline">&laquo; Назад к урокам</a>
+        <a href="lessons.html" class="btn btn-outline">&laquo; Назад к урокам</a>
       </div>
       
       <div id="lesson-container">
         <div class="loading">Загрузка урока...</div>
+      </div>
+      
+      <div class="related-exercises">
+        <h3>Упражнения по этой теме</h3>
+        <div id="lesson-exercises" class="exercises-mini-list">
+          <div class="loading">Загрузка упражнений...</div>
+        </div>
+        <div class="text-center mt-4">
+          <a href="exercises.html?lesson_id=" class="btn btn-primary" id="all-lesson-exercises">
+            Все упражнения по этой теме
+          </a>
+        </div>
       </div>
       
       <div class="lesson-navigation-bottom">
@@ -45,50 +117,82 @@
 
   <footer>
     <div class="container">
-      <p>&copy; 2025 Обучение SQL</p>
+      <div class="footer-content">
+        <div class="footer-logo">
+          <span class="logo-text">Learn</span>
+          <p>Интерактивная платформа для изучения SQL</p>
+        </div>
+        <div class="footer-links">
+          <div class="footer-column">
+            <h4>Обучение</h4>
+            <ul>
+              <li><a href="lessons.html">Уроки</a></li>
+              <li><a href="exercises.html">Упражнения</a></li>
+            </ul>
+          </div>
+          <div class="footer-column">
+            <h4>Ресурсы</h4>
+            <ul>
+              <li><a href="api.html">API</a></li>
+              <li><a href="faq.html">FAQ</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2025 DB Learn. Все права защищены.</p>
+      </div>
     </div>
   </footer>
 
-  <!-- Тип "module" позволяет использовать ES модули и import/export -->
+  <!-- Скрипт для отображения урока -->
   <script type="module">
-    import { lessonsApi } from '/js/api.js';
+    import { lessonsApi, exercisesApi } from './js/api.js';
 
     // Получаем параметры из URL
     const urlParams = new URLSearchParams(window.location.search);
     const lessonId = urlParams.get('id');
-    const lessonSlug = urlParams.get('slug');
 
     // Загружаем урок при загрузке страницы
     document.addEventListener('DOMContentLoaded', () => {
-      loadLesson();
+      console.log('DOM загружен, начинаем загрузку урока');
+      if (!lessonId) {
+        document.getElementById('lesson-container').innerHTML = 
+          '<div class="error">Идентификатор урока не указан в URL.</div>';
+        return;
+      }
+      
+      loadLesson(lessonId);
     });
 
     // Загрузка урока из API
-    async function loadLesson() {
+    async function loadLesson(id) {
       try {
-        let lesson;
+        console.log('Загружаем урок с ID:', id);
         
-        // Загружаем урок либо по ID, либо по slug
-        if (lessonId) {
-          lesson = await lessonsApi.getById(lessonId);
-        } else if (lessonSlug) {
-          lesson = await lessonsApi.getBySlug(lessonSlug);
-        } else {
-          showError('Идентификатор урока не указан в URL.');
-          return;
-        }
+        // Отображаем состояние загрузки
+        const lessonContainer = document.getElementById('lesson-container');
+        lessonContainer.innerHTML = '<div class="loading">Загрузка урока...</div>';
+        
+        // Получаем урок с сервера
+        const lesson = await lessonsApi.getById(id);
+        console.log('Получили данные урока:', lesson);
         
         // Отображаем урок
         displayLesson(lesson);
         
         // Обновляем заголовок страницы
-        document.title = `${lesson.title} - Обучение SQL`;
+        document.title = `${lesson.title} - DB Learn`;
         
         // Загружаем навигацию между уроками
-        loadLessonNavigation(lesson.id);
+        loadLessonNavigation(lesson.id, lesson.order);
+        
+        // Загружаем упражнения для этого урока
+        loadRelatedExercises(lesson.id);
       } catch (error) {
-        showError('Не удалось загрузить урок. Пожалуйста, попробуйте позже.');
-        console.error('Ошибка загрузки урока:', error);
+        console.error('Ошибка при загрузке урока:', error);
+        document.getElementById('lesson-container').innerHTML = 
+          `<div class="error">Не удалось загрузить урок. Пожалуйста, попробуйте позже.</div>`;
       }
     }
 
@@ -96,12 +200,12 @@
     function displayLesson(lesson) {
       const lessonContainer = document.getElementById('lesson-container');
       
-      // Преобразуем markdown в HTML
+      // Преобразуем markdown в HTML (если используете marked.js)
       const contentHtml = marked.parse(lesson.body_md);
       
       lessonContainer.innerHTML = `
         <h2>${lesson.title}</h2>
-        <p class="lesson-info">Обновлено: ${formatDate(lesson.updated_at)}</p>
+        <p class="lesson-info">Урок ${lesson.order} | Обновлено: ${formatDate(lesson.updated_at)}</p>
         <div class="lesson-body">
           ${contentHtml}
         </div>
@@ -109,27 +213,81 @@
     }
 
     // Загрузка навигации между уроками
-    async function loadLessonNavigation(currentLessonId) {
+// Загрузка навигации между уроками
+    async function loadLessonNavigation(currentLessonId, currentOrder) {
       try {
-        // Здесь можно было бы загрузить список всех уроков и найти предыдущий/следующий
-        // Для простоты просто предположим, что ID идут последовательно
-        const prevId = parseInt(currentLessonId) - 1;
-        const nextId = parseInt(currentLessonId) + 1;
+        // Загружаем все уроки для навигации
+        const data = await lessonsApi.getList(1, 100); // Получаем все уроки (до 100)
         
-        const prevContainer = document.getElementById('prev-lesson');
-        const nextContainer = document.getElementById('next-lesson');
-        
-        if (prevId > 0) {
-          prevContainer.innerHTML = `
-            <a href="/lesson.html?id=${prevId}" class="btn">&laquo; Предыдущий урок</a>
-          `;
+        if (data.items.length > 0) {
+          // Сортируем уроки по порядку
+          const sortedLessons = data.items.sort((a, b) => a.order - b.order);
+          
+          // Находим текущий урок в отсортированном массиве
+          const currentIndex = sortedLessons.findIndex(lesson => lesson.id === currentLessonId);
+          
+          const prevContainer = document.getElementById('prev-lesson');
+          const nextContainer = document.getElementById('next-lesson');
+          
+          // Если есть предыдущий урок
+          if (currentIndex > 0) {
+            const prevLesson = sortedLessons[currentIndex - 1];
+            prevContainer.innerHTML = `
+              <a href="lesson.html?id=${prevLesson.id}" class="btn btn-outline">
+                Предыдущий урок
+              </a>
+            `;
+          } else {
+            // Создаем пустой элемент для сохранения выравнивания
+            prevContainer.innerHTML = `<div class="empty-navigation"></div>`;
+          }
+          
+          // Если есть следующий урок
+          if (currentIndex < sortedLessons.length - 1) {
+            const nextLesson = sortedLessons[currentIndex + 1];
+            nextContainer.innerHTML = `
+              <a href="lesson.html?id=${nextLesson.id}" class="btn btn-primary">
+                Следующий урок
+              </a>
+            `;
+          } else {
+            // Создаем пустой элемент для сохранения выравнивания
+            nextContainer.innerHTML = `<div class="empty-navigation"></div>`;
+          }
         }
-        
-        nextContainer.innerHTML = `
-          <a href="/lesson.html?id=${nextId}" class="btn">Следующий урок &raquo;</a>
-        `;
       } catch (error) {
         console.error('Ошибка при загрузке навигации:', error);
+      }
+    }
+    // Загрузка упражнений для этого урока
+    async function loadRelatedExercises(lessonId) {
+      try {
+        const exercisesContainer = document.getElementById('lesson-exercises');
+        const allExercisesLink = document.getElementById('all-lesson-exercises');
+        
+        // Обновляем ссылку на все упражнения
+        allExercisesLink.href = `exercises.html?lesson_id=${lessonId}`;
+        
+        // Загружаем упражнения для этого урока (первые 3)
+        const data = await exercisesApi.getList(1, 3, lessonId);
+        
+        if (data.items.length === 0) {
+          exercisesContainer.innerHTML = '<p>Для этого урока пока нет упражнений.</p>';
+          return;
+        }
+   
+        const exercisesHtml = data.items.map(exercise => `
+          <div class="exercise-mini-card">
+            <h4>${exercise.title}</h4>
+            <a href="exercise.html?id=${exercise.id}" class="btn btn-sm btn-primary">Выполнить</a>
+          </div>
+        `).join('');
+        
+        exercisesContainer.innerHTML = exercisesHtml;
+      } catch (error) {
+        console.error('Ошибка загрузки упражнений:', error);
+        document.getElementById('lesson-exercises').innerHTML = 
+          '<p>Не удалось загрузить упражнения. Пожалуйста, попробуйте позже.</p>';
       }
     }
 
@@ -141,11 +299,6 @@
         month: '2-digit', 
         year: 'numeric' 
       });
-    }
-
-    function showError(message) {
-      const lessonContainer = document.getElementById('lesson-container');
-      lessonContainer.innerHTML = `<div class="error">${message}</div>`;
     }
   </script>
 </body>

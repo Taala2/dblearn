@@ -1,0 +1,16 @@
+UPDATE lesson SET "order" = 1 where id = 1;
+UPDATE lesson SET "order" = 2 where id = 2;
+UPDATE lesson SET "order" = 3 where id = 3;
+UPDATE lesson SET "order" = 4 where id = 4;
+UPDATE lesson SET "order" = 5 where id = 5;
+UPDATE lesson SET "order" = 6 where id = 6;
+UPDATE lesson SET "order" = 7 where id = 7;
+UPDATE lesson SET "order" = 8 where id = 8;
+UPDATE lesson SET "order" = 9 where id = 9;
+UPDATE lesson SET "order" = 10 where id = 10;
+UPDATE lesson SET "order" = 11 where id = 11;
+UPDATE lesson SET "order" = 12 where id = 12;
+UPDATE lesson SET "order" = 13 where id = 13;
+UPDATE lesson SET "order" = 14 where id = 14;
+UPDATE lesson SET "order" = 15 where id = 15;
+UPDATE lesson SET "order" = 16 where id = 16;

@@ -3,72 +3,201 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Обучение SQL - Главная</title>
-  <link rel="stylesheet" href="/css/styles.css">
+  <title>DB Learn - Интерактивное обучение SQL</title>
+  <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
   <header>
-    <nav class="navbar">
-      <div class="container">
-        <div class="navbar-brand">
-          <h1>SQL Обучение</h1>
+    <div class="container">
+      <nav class="main-nav">
+        <div class="logo">
+          <a href="/">
+            <span class="logo-text">Learn</span>
+          </a>
         </div>
-        <div class="navbar-menu">
-          <ul class="nav-links">
-            <li><a href="/" class="nav-link">Главная</a></li>
-            <li><a href="/lessons.html" class="nav-link">Уроки</a></li>
-            <li><a href="/exercises.html" class="nav-link">Упражнения</a></li>
-          </ul>
+        <ul class="nav-links">
+          <li><a href="/" class="active">Главная</a></li>
+          <li><a href="/lessons.html">Уроки</a></li>
+          <li><a href="/exercises.html">Упражнения</a></li>
+          <li><a href="/api.html">API</a></li>
+        </ul>
+        <div class="auth-buttons">
+          <a href="/lessons.html" class="btn btn-primary">Начать обучение</a>
         </div>
-      </div>
-    </nav>
+      </nav>
+    </div>
   </header>
 
-  <main class="container">
-    <section class="hero-section">
-      <h2>Практическое обучение SQL на основе реальных задач</h2>
-      <p class="hero-text">
-        Добро пожаловать на платформу обучения SQL! Здесь вы найдете уроки для изучения и практические упражнения,
-        которые помогут вам освоить работу с базами данных SQL от основ до продвинутых техник.
-      </p>
-      
-      <div class="cta-buttons">
-        <a href="/lessons.html" class="btn">Начать обучение</a>
-        <a href="/exercises.html" class="btn btn-outline">Перейти к упражнениям</a>
+  <section class="hero-section">
+    <div class="container">
+      <div class="hero-content">
+        <h1>Изучайте SQL интерактивно</h1>
+        <p class="hero-description">
+          DB-Learn — платформа для изучения баз данных с интерактивными упражнениями и
+          мгновенной обратной связью. От простых запросов до сложных транзакций.
+        </p>
+        <div class="hero-actions">
+          <a href="/lessons.html" class="btn btn-primary btn-lg">Начать обучение</a>
+        </div>
       </div>
-    </section>
-    
-    <section class="features-section">
-      <h2>Особенности нашей платформы</h2>
+    </div>
+  </section>
+
+  <section class="features-section">
+    <div class="container">
+      <h2 class="section-title">Особенности платформы</h2>
+      <p class="section-description">
+        DB-Learn предлагает уникальный опыт обучения базам данных через практику
+      </p>
       
       <div class="features-grid">
         <div class="feature-card">
-          <h3>Интерактивные уроки</h3>
-          <p>Изучайте синтаксис SQL и принципы работы баз данных через наши детальные уроки с примерами.</p>
+          <div class="feature-icon">
+            <!-- Иконка книги - встроенный SVG -->
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+          </div>
+          <h3>Структурированные уроки</h3>
+          <p>
+            Последовательно изучайте SQL, начиная с простых запросов и заканчивая
+            сложными темами: от SELECT до транзакций и оптимизации.
+          </p>
         </div>
         
         <div class="feature-card">
-          <h3>Практические упражнения</h3>
-          <p>Закрепляйте знания через практику, решая реальные задачи с использованием SQL.</p>
+          <div class="feature-icon">
+            <!-- Иконка браузера - встроенный SVG -->
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+          </div>
+          <h3>Практика в браузере</h3>
+          <p>
+            Выполняйте SQL-запросы прямо в браузере. Никаких настроек или
+            установок — просто пишите код и видите результаты мгновенно.
+          </p>
         </div>
         
         <div class="feature-card">
-          <h3>SQL-консоль</h3>
-          <p>Выполняйте SQL-запросы прямо в браузере и получайте мгновенный результат.</p>
-        </div>
-        
-        <div class="feature-card">
-          <h3>Отслеживание прогресса</h3>
-          <p>Следите за своим прогрессом в обучении и совершенствуйте навыки работы с базами данных.</p>
+          <div class="feature-icon">
+            <!-- Иконка обратной связи - встроенный SVG -->
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+          </div>
+          <h3>Мгновенная обратная связь</h3>
+          <p>
+            Получайте немедленную проверку ваших решений. Каждое упражнение
+            автоматически проверяется на корректность и эффективность.
+          </p>
         </div>
       </div>
-    </section>
-  </main>
+    </div>
+  </section>
+
+  <section class="curriculum-section">
+    <div class="container">
+      <h2 class="section-title">Наша программа</h2>
+      <p class="section-description">
+        Логически выстроенный путь от новичка до профессионала в базах данных
+      </p>
+      
+      <div id="curriculum-list" class="curriculum-list">
+        <!-- Здесь будут динамически загружаться уроки из API -->
+        <div class="loading">Загрузка учебной программы...</div>
+      </div>
+    </div>
+  </section>
 
   <footer>
     <div class="container">
-      <p>&copy; 2025 Обучение SQL</p>
+      <div class="footer-content">
+        <div class="footer-logo">
+          <span class="logo-text">Learn</span>
+          <p>Интерактивная платформа для изучения SQL</p>
+        </div>
+        <div class="footer-links">
+          <div class="footer-column">
+            <h4>Обучение</h4>
+            <ul>
+              <li><a href="/lessons.html">Уроки</a></li>
+              <li><a href="/exercises.html">Упражнения</a></li>
+            </ul>
+          </div>
+          <div class="footer-column">
+            <h4>Ресурсы</h4>
+            <ul>
+              <li><a href="/api.html">API</a></li>
+              <li><a href="/faq.html">FAQ</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2025 DB Learn. Все права защищены.</p>
+      </div>
     </div>
   </footer>
+
+  <script type="module">
+    import { lessonsApi } from '/js/api.js';
+
+    // Загрузка учебной программы при загрузке страницы
+    document.addEventListener('DOMContentLoaded', () => {
+      loadCurriculum();
+    });
+
+    // Загрузка списка уроков для учебной программы
+    async function loadCurriculum() {
+      try {
+        const curriculumContainer = document.getElementById('curriculum-list');
+        
+        // Получаем все уроки
+        const data = await lessonsApi.getList(1, 100); // Получаем до 100 уроков
+        
+        if (data.items.length === 0) {
+          curriculumContainer.innerHTML = '<p>Уроки не найдены.</p>';
+          return;
+        }
+        
+        // Сортируем уроки по полю order
+        const sortedLessons = data.items.sort((a, b) => a.order - b.order);
+        
+        // Создаем HTML для учебной программы
+        let curriculumHTML = '';
+        sortedLessons.forEach((lesson, index) => {
+          // Определяем уровень сложности на основе порядкового номера
+          let level = 'Основы';
+          if (index > 9) level = 'Продвинутый';
+          else if (index > 5) level = 'Средний';
+          
+          curriculumHTML += `
+            <div class="curriculum-item">
+              <div class="curriculum-number">${(index + 1).toString().padStart(2, '0')}</div>
+              <div class="curriculum-content">
+                <h3>${lesson.title}</h3>
+                <p>${getPreview(lesson.body_md)}</p>
+                <div class="curriculum-meta">
+                  <span class="tag">${level}</span>
+                  <span class="exercises-count">5 упражнений</span>
+                  <span class="duration">~20 минут</span>
+                  <a href="/lessons.html" class="btn btn-sm btn-outline">Перейти к уроку</a>
+                </div>
+              </div>
+            </div>
+          `;
+        });
+        
+        curriculumContainer.innerHTML = curriculumHTML;
+      } catch (error) {
+        console.error('Ошибка загрузки учебной программы:', error);
+        document.getElementById('curriculum-list').innerHTML = 
+          '<p>Не удалось загрузить учебную программу. Пожалуйста, попробуйте позже.</p>';
+      }
+    }
+
+    // Функция для получения превью из markdown
+    function getPreview(markdown) {
+      if (!markdown) return '';
+      // Простая функция для получения превью из markdown
+      const plainText = markdown.replace(/#{1,6}\s?/g, '').replace(/\*\*|\*|__|_/g, '');
+      return plainText.length > 150 ? plainText.slice(0, 150) + '...' : plainText;
+    }
+  </script>
 </body>
 </html>

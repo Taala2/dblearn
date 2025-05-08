@@ -4,11 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Обучение SQL - Упражнение</title>
-  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="stylesheet" href="css/styles.css">
   <!-- Добавляем библиотеку CodeMirror для редактора кода -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.3/codemirror.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.3/theme/darcula.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.3/codemirror.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.3/mode/sql/sql.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.3/addon/hint/show-hint.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.3/addon/hint/sql-hint.min.js"></script>
   <!-- Добавляем библиотеку для отображения markdown -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
   <style>
@@ -142,8 +145,8 @@
         <div class="navbar-menu">
           <ul class="nav-links">
             <li><a href="/" class="nav-link">Главная</a></li>
-            <li><a href="/lessons.html" class="nav-link">Уроки</a></li>
-            <li><a href="/exercises.html" class="nav-link">Упражнения</a></li>
+            <li><a href="lessons.html" class="nav-link">Уроки</a></li>
+            <li><a href="exercises.html" class="nav-link">Упражнения</a></li>
           </ul>
         </div>
       </div>
@@ -153,7 +156,7 @@
   <main class="container">
     <section class="exercise-content">
       <div class="exercise-navigation">
-        <a href="/exercises.html" class="btn btn-outline">&laquo; Назад к упражнениям</a>
+        <a href="exercises.html" class="btn btn-outline">&laquo; Назад к упражнениям</a>
       </div>
       
       <div id="exercise-container">
@@ -199,11 +202,12 @@
 
   <!-- Тип "module" позволяет использовать ES модули и import/export -->
   <script type="module">
-    import { exercisesApi } from '/js/api.js';
+    import { exercisesApi } from './js/api.js';
 
     // Получаем параметры из URL
     const urlParams = new URLSearchParams(window.location.search);
     const exerciseId = urlParams.get('id');
+    console.log('ID упражнения:', exerciseId);
     
     // Глобальная переменная для редактора CodeMirror
     let sqlEditor;
@@ -213,6 +217,7 @@
 
     // Загружаем упражнение при загрузке страницы
     document.addEventListener('DOMContentLoaded', () => {
+      console.log('DOM загружен, начинаем загрузку упражнения');
       loadExercise();
       
       // Инициализация обработчиков событий
@@ -228,8 +233,11 @@
           return;
         }
         
+        console.log('Загружаем упражнение с ID:', exerciseId);
+        
         // Загружаем упражнение по ID
         currentExercise = await exercisesApi.getById(exerciseId);
+        console.log('Получены данные упражнения:', currentExercise);
         
         // Отображаем упражнение
         displayExercise(currentExercise);
@@ -266,7 +274,7 @@
       // Если у упражнения есть связанный урок, добавляем ссылку на него
       if (exercise.lesson_id) {
         html += `
-          <a href="/lesson.html?id=${exercise.lesson_id}" class="lesson-link">
+          <a href="lesson.html?id=${exercise.lesson_id}" class="lesson-link">
             Связанный урок #${exercise.lesson_id}
           </a>
         `;
@@ -279,21 +287,6 @@
       `;
       
       exerciseContainer.innerHTML = html;
-    }
-
-    // Инициализация редактора SQL-кода
-    function initSqlEditor(initialCode) {
-      sqlEditor = CodeMirror(document.getElementById('sql-editor'), {
-        value: initialCode,
-        mode: 'text/x-sql',
-        lineNumbers: true,
-        indentWithTabs: false,
-        tabSize: 2,
-        indentUnit: 2,
-        autoCloseBrackets: true,
-        matchBrackets: true,
-        theme: 'default'
-      });
     }
 
     // Выполнение SQL-кода
@@ -415,6 +408,42 @@
       const exerciseContainer = document.getElementById('exercise-container');
       exerciseContainer.innerHTML = `<div class="error">${message}</div>`;
     }
+
+    // Улучшенная инициализация редактора SQL-кода
+    function initSqlEditor(initialCode) {
+        sqlEditor = CodeMirror(document.getElementById('sql-editor'), {
+          value: initialCode,
+          mode: 'text/x-sql',
+          theme: 'darcula',  // Темная тема для лучшей читаемости
+          lineNumbers: true,
+          indentWithTabs: false,
+          tabSize: 2,
+          indentUnit: 2,
+          autoCloseBrackets: true,
+          matchBrackets: true,
+          extraKeys: {
+            "Ctrl-Enter": runSqlCode,  // Запуск кода по Ctrl+Enter
+            "Cmd-Enter": runSqlCode,   // Для Mac
+            "Tab": "insertSoftTab"
+          },
+          hintOptions: {
+            tables: {
+              customers: ["id", "first_name", "last_name", "email", "city", "country", "birth_date"],
+              products: ["id", "name", "description", "price", "category", "stock"],
+              orders: ["id", "customer_id", "order_date", "total_amount", "status"]
+            }
+          }
+        });
+        
+        // Включаем автозавершение
+        sqlEditor.on("keyup", function (cm, event) {
+          if (!cm.state.completionActive && 
+              event.keyCode != 13 && 
+              event.keyCode != 27) {
+            CodeMirror.commands.autocomplete(cm, null, {completeSingle: false});
+          }
+        });
+      }
   </script>
 </body>
 </html>

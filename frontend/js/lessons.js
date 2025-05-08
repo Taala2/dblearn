@@ -40,8 +40,11 @@ async function loadLessons() {
     // Обновляем информацию о количестве уроков
     state.total = data.total;
     
+    // Сортируем уроки по полю order
+    const sortedLessons = data.items.sort((a, b) => a.order - b.order);
+    
     // Отображаем уроки
-    displayLessons(data.items);
+    displayLessons(sortedLessons);
     
     // Обновляем пагинацию
     updatePagination();
@@ -51,7 +54,6 @@ async function loadLessons() {
   }
 }
 
-// Отображение уроков на странице
 function displayLessons(lessons) {
   const lessonsContainer = document.getElementById('lessons-list');
   
@@ -64,10 +66,12 @@ function displayLessons(lessons) {
   const lessonsHtml = lessons.map(lesson => `
     <div class="lesson-card">
       <h3>${lesson.title}</h3>
-      <p class="lesson-info">Обновлено: ${formatDate(lesson.updated_at)}</p>
+      <p class="lesson-info">Урок ${lesson.order} | Обновлено: ${formatDate(lesson.updated_at)}</p>
       <p class="lesson-preview">${getPreview(lesson.body_md)}</p>
-      <a href="/lesson.html?id=${lesson.id}" class="btn">Читать урок</a>
-      <a href="/lesson.html?slug=${lesson.slug}" class="btn btn-outline">Открыть по slug</a>
+      <div class="card-actions">
+        <a href="lesson.html?id=${lesson.id}" class="btn btn-primary">Читать урок</a>
+        <a href="exercises.html?lesson_id=${lesson.id}" class="btn btn-outline">Упражнения</a>
+      </div>
     </div>
   `).join('');
   
@@ -131,8 +135,8 @@ function formatDate(dateString) {
 }
 
 function getPreview(markdown) {
+  if (!markdown) return '';
   // Простая функция для получения превью из markdown
-  // В реальном приложении можно использовать библиотеку для обработки markdown
   const plainText = markdown.replace(/#{1,6}\s?/g, '').replace(/\*\*|\*|__|_/g, '');
   return plainText.length > 150 ? plainText.slice(0, 150) + '...' : plainText;
 }

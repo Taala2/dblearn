@@ -1,5 +1,5 @@
 // exercises.js - Логика для страницы упражнений
-import { exercisesApi } from './api.js';
+import { exercisesApi, lessonsApi } from './api.js';
 
 // Состояние для хранения текущей страницы и общего количества упражнений
 const state = {
@@ -19,41 +19,53 @@ document.addEventListener('DOMContentLoaded', () => {
   if (lessonId) {
     state.lessonId = lessonId;
     
-    // Добавляем информацию о фильтрации по уроку
-    const headerElement = document.querySelector('.exercises-section h2');
-    if (headerElement) {
-      headerElement.innerHTML = 'Упражнения по уроку <span class="lesson-link"></span>';
-      
-      // Добавляем ссылку на урок
-      const lessonLink = document.createElement('a');
-      lessonLink.href = `/lesson.html?id=${lessonId}`;
-      lessonLink.textContent = `#${lessonId}`;
-      lessonLink.className = 'lesson-filter-link';
-      document.querySelector('.lesson-link').appendChild(lessonLink);
-    }
+    // Загружаем информацию об уроке для заголовка
+    loadLessonInfo(lessonId);
   }
   
   // Загружаем упражнения
   loadExercises();
 
-  // Проверяем, существует ли объект window.changePage
-  if (!window.changePage) {
-    // Добавляем функцию changePage в глобальный объект window
-    window.changePage = function(page) {
-      if (page < 1 || page > Math.ceil(state.total / state.limit)) {
-        return;
-      }
-      
-      state.currentPage = page;
-      loadExercises();
-      
-      // Прокручиваем страницу вверх
-      window.scrollTo(0, 0);
-    };
-  }
+  // Добавляем функцию changePage в глобальный объект window
+  window.changePage = function(page) {
+    if (page < 1 || page > Math.ceil(state.total / state.limit)) {
+      return;
+    }
+    
+    state.currentPage = page;
+    loadExercises();
+    
+    // Прокручиваем страницу вверх
+    window.scrollTo(0, 0);
+  };
 });
 
-
+// Загрузка информации об уроке
+async function loadLessonInfo(lessonId) {
+  try {
+    const lesson = await lessonsApi.getById(lessonId);
+    
+    // Добавляем информацию о фильтрации по уроку
+    const headerElement = document.querySelector('.exercises-section h2');
+    if (headerElement) {
+      headerElement.innerHTML = `Упражнения по уроку: ${lesson.title} (Урок ${lesson.order})`;
+    }
+    
+    // Добавляем ссылку "Назад к уроку"
+    const navigationElement = document.querySelector('.exercises-section');
+    if (navigationElement) {
+      const backLinkHTML = `
+        <div class="lesson-navigation">
+          <a href="/lesson.html?id=${lessonId}" class="btn btn-outline">&laquo; Назад к уроку</a>
+        </div>
+      `;
+      
+      navigationElement.insertAdjacentHTML('afterbegin', backLinkHTML);
+    }
+  } catch (error) {
+    console.error('Ошибка загрузки информации об уроке:', error);
+  }
+}
 
 // Загрузка упражнений с API
 async function loadExercises() {
@@ -63,14 +75,13 @@ async function loadExercises() {
     
     // Загружаем упражнения (с фильтрацией по уроку, если нужно)
     const data = await exercisesApi.getList(state.currentPage, state.limit, state.lessonId);
-
+    
     // Обновляем информацию о количестве упражнений
     state.total = data.total;
     
     // Отображаем упражнения
     displayExercises(data.items);
-
-
+    
     // Обновляем пагинацию
     updatePagination();
   } catch (error) {
@@ -78,42 +89,6 @@ async function loadExercises() {
     console.error('Ошибка загрузки упражнений:', error);
   }
 }
-let sqlEditor = null;
-// Улучшенная инициализация редактора SQL-кода
-function initSqlEditor(initialCode) {
-    sqlEditor = CodeMirror(document.getElementById('sql-editor'), {
-      value: initialCode,
-      mode: 'text/x-sql',
-      theme: 'darcula',  // Темная тема для лучшей читаемости
-      lineNumbers: true,
-      indentWithTabs: false,
-      tabSize: 2,
-      indentUnit: 2,
-      autoCloseBrackets: true,
-      matchBrackets: true,
-      extraKeys: {
-        "Ctrl-Enter": runSqlCode,  // Запуск кода по Ctrl+Enter
-        "Cmd-Enter": runSqlCode,   // Для Mac
-        "Tab": "insertSoftTab"
-      },
-      hintOptions: {
-        tables: {
-          customers: ["id", "first_name", "last_name", "email", "city", "country", "birth_date"],
-          products: ["id", "name", "description", "price", "category", "stock"],
-          orders: ["id", "customer_id", "order_date", "total_amount", "status"]
-        }
-      }
-    });
-    
-    // Включаем автозавершение
-    sqlEditor.on("keyup", function (cm, event) {
-      if (!cm.state.completionActive && 
-          event.keyCode != 13 && 
-          event.keyCode != 27) {
-        CodeMirror.commands.autocomplete(cm, null, {completeSingle: false});
-      }
-    });
-  }
 
 // Отображение упражнений на странице
 function displayExercises(exercises) {
@@ -122,36 +97,40 @@ function displayExercises(exercises) {
   if (exercises.length === 0) {
     exercisesContainer.innerHTML = '<p>Упражнения не найдены.</p>';
     return;
-  }
-  
+  }  
   // Создаем HTML для каждого упражнения
   const exercisesHtml = exercises.map(exercise => `
     <div class="exercise-card">
       <h3>${exercise.title}</h3>
       <p class="exercise-info">
-        Порядок: ${exercise.order} | 
+        ${exercise.lesson_id ? `Урок ${exercise.lesson_id} | ` : ''}
         Создано: ${formatDate(exercise.created_at)}
       </p>
       <p class="exercise-preview">${getPreview(exercise.description_md)}</p>
-      <a href="/exercise.html?id=${exercise.id}" class="btn">Выполнить упражнение</a>
+      <div class="card-actions">
+        <a href="/exercise.html?id=${exercise.id}" class="btn btn-primary">Выполнить упражнение</a>
+        ${exercise.lesson_id ? 
+          `<a href="/lesson.html?id=${exercise.lesson_id}" class="btn btn-outline">Перейти к уроку</a>` : 
+          ''}
+      </div>
     </div>
   `).join('');
-  
+
   exercisesContainer.innerHTML = exercisesHtml;
-}
+  }
 
 // Обновление пагинации
 function updatePagination() {
   const paginationContainer = document.getElementById('pagination');
   const totalPages = Math.ceil(state.total / state.limit);
-  
+
   if (totalPages <= 1) {
     paginationContainer.innerHTML = '';
     return;
   }
-  
+
   let paginationHtml = '';
-  
+
   // Кнопка "Предыдущая страница"
   paginationHtml += `
     <button 
@@ -161,7 +140,7 @@ function updatePagination() {
       &laquo; Назад
     </button>
   `;
-  
+
   // Номера страниц
   for (let i = 1; i <= totalPages; i++) {
     paginationHtml += `
@@ -172,7 +151,7 @@ function updatePagination() {
       </button>
     `;
   }
-  
+
   // Кнопка "Следующая страница"
   paginationHtml += `
     <button 
@@ -182,11 +161,11 @@ function updatePagination() {
       Вперед &raquo;
     </button>
   `;
-  
+
   paginationContainer.innerHTML = paginationHtml;
 }
 
-// Вспомогательные функции
+  // Вспомогательные функции
 function formatDate(dateString) {
   const date = new Date(dateString);
   return date.toLocaleDateString('ru-RU', { 
@@ -197,9 +176,8 @@ function formatDate(dateString) {
 }
 
 function getPreview(markdown) {
-  // Простая функция для получения превью из markdown
-  // В реальном приложении можно использовать библиотеку для обработки markdown
-  if (!markdown) return '';
+if (!markdown) return '';
+// Простая функция для получения превью из markdown
   const plainText = markdown.replace(/#{1,6}\s?/g, '').replace(/\*\*|\*|__|_/g, '');
   return plainText.length > 150 ? plainText.slice(0, 150) + '...' : plainText;
 }
