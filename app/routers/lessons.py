@@ -1,4 +1,3 @@
-from typing import List
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlmodel import Session, select
 
@@ -19,7 +18,7 @@ def get_lessons(
     query = select(Lesson).order_by(Lesson.order).offset(skip).limit(limit)
     lessons = db.exec(query).all()
     total = db.exec(select(Lesson)).all()
-    
+
     return LessonList(items=lessons, total=len(total))
 
 

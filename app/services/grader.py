@@ -1,8 +1,7 @@
 import json
 import sqlite3
-import time
 import asyncio
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 from app.core.config import settings
 from app.schemas import RunResult
@@ -13,13 +12,13 @@ def execute_query(conn: sqlite3.Connection, query: str) -> List[Dict[str, Any]]:
     try:
         cursor = conn.cursor()
         cursor.execute(query)
-        
+
         # Get column names
         columns = [col[0] for col in cursor.description] if cursor.description else []
-        
+
         # Fetch rows with limit
         rows = cursor.fetchmany(settings.SQL_MAX_ROWS)
-        
+
         # Convert to list of dictionaries
         results = [dict(zip(columns, row)) for row in rows]
         return results
@@ -36,12 +35,12 @@ def normalize_results(results: List[Dict[str, Any]]) -> str:
 def evaluate_sql(init_sql: str, expected_sql: str, submitted_sql: str) -> RunResult:
     """
     Evaluate submitted SQL against expected SQL.
-    
+
     Args:
         init_sql: SQL to initialize the database environment
         expected_sql: The reference SQL solution
         submitted_sql: The SQL submitted by the user
-    
+
     Returns:
         RunResult object with evaluation results
     """
@@ -49,25 +48,25 @@ def evaluate_sql(init_sql: str, expected_sql: str, submitted_sql: str) -> RunRes
         # Create in-memory database
         conn = sqlite3.connect(":memory:")
         conn.row_factory = sqlite3.Row
-        
+
         # Initialize database with setup SQL
         conn.executescript(init_sql)
         conn.commit()
-        
+
         # Execute expected SQL
         expected_results = execute_query(conn, expected_sql)
         expected_json = normalize_results(expected_results)
-        
+
         # Execute submitted SQL with timeout
         submitted_results = execute_query(conn, submitted_sql)
         submitted_json = normalize_results(submitted_results)
-        
+
         # Compare results
         is_correct = (expected_json == submitted_json)
-        
+
         # Close connection
         conn.close()
-        
+
         return RunResult(
             is_correct=is_correct,
             result_json=submitted_json,
@@ -75,7 +74,7 @@ def evaluate_sql(init_sql: str, expected_sql: str, submitted_sql: str) -> RunRes
             rows=submitted_results,
             error=None
         )
-        
+
     except Exception as e:
         return RunResult(
             is_correct=False,
@@ -89,7 +88,7 @@ def evaluate_sql(init_sql: str, expected_sql: str, submitted_sql: str) -> RunRes
 async def evaluate_sql_with_timeout(init_sql: str, expected_sql: str, submitted_sql: str) -> RunResult:
     """
     Evaluate SQL with a timeout to prevent long-running queries.
-    
+
     This function runs the evaluation in a separate thread to allow timeout enforcement.
     """
     try:
@@ -110,7 +109,7 @@ async def evaluate_sql_with_timeout(init_sql: str, expected_sql: str, submitted_
             rows=None,
             error=f"Query execution timed out after {settings.SQL_TIMEOUT_SECONDS} seconds"
         )
-    
+
 
 def evaluate_sql_with_restrictions(init_sql, expected_sql, submitted_sql):
     # Проверка на запрещенные операции
@@ -118,7 +117,7 @@ def evaluate_sql_with_restrictions(init_sql, expected_sql, submitted_sql):
     for keyword in forbidden_keywords:
         if keyword in submitted_sql.upper() and 'SELECT' not in submitted_sql.upper():
             raise Exception(f"Операция {keyword} запрещена в учебном режиме")
-    
+
     # Далее ваш существующий код
 
 
@@ -129,6 +128,6 @@ def compare_query_results(expected_results, submitted_results, ignore_order=Fals
         expected_sorted = sorted(expected_results, key=lambda x: json.dumps(x, sort_keys=True))
         submitted_sorted = sorted(submitted_results, key=lambda x: json.dumps(x, sort_keys=True))
         return expected_sorted == submitted_sorted
-    
+
     # Иначе прямое сравнение с учетом порядка
     return expected_results == submitted_results

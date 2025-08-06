@@ -1,4 +1,3 @@
-from typing import List
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlmodel import Session, select
 
@@ -18,18 +17,18 @@ def get_exercises(
 ):
     """Get exercises with optional filtering by lesson ID."""
     query = select(Exercise).order_by(Exercise.order)
-    
+
     if lesson_id is not None:
         query = query.where(Exercise.lesson_id == lesson_id)
-    
+
     exercises = db.exec(query.offset(skip).limit(limit)).all()
     total_query = select(Exercise)
-    
+
     if lesson_id is not None:
         total_query = total_query.where(Exercise.lesson_id == lesson_id)
-    
+
     total = db.exec(total_query).all()
-    
+
     return ExerciseList(items=exercises, total=len(total))
 
 

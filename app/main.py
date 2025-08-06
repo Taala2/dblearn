@@ -1,10 +1,9 @@
-from fastapi import FastAPI, Request, HTTPException
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 import os
 
-from app.core.config import settings
 from app.core.database import create_db_and_tables
 from app.routers import exercises, lessons, runner
 
@@ -62,7 +61,7 @@ async def serve_static_files(path: str):
     file_path = f"frontend/{path}"
     if os.path.exists(file_path) and os.path.isfile(file_path):
         return FileResponse(file_path)
-    
+
     # Если файл не найден, возвращаем 404 или перенаправляем на главную
     raise HTTPException(status_code=404, detail="File not found")
 
